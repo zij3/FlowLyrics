@@ -1,3 +1,62 @@
 #ytml-root {
+  --ytml-bg: rgba(12, 13, 15, 0.88);
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  z-index: 2147483647;
+  color: #fff;
+  font-family: Roboto, Arial, sans-serif;
+}
+
+.ytml-pill {
+  background: #18181a;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.ytml-panel {
   display: none;
+  width: 450px;
+  height: min(620px, calc(100vh - 150px));
+  margin-top: 12px;
+  background: var(--ytml-bg);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#ytml-root.ytml-open .ytml-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.ytml-header,
+.ytml-footer {
+  padding: 18px;
+}
+
+.ytml-lines {
+  overflow: auto;
+  padding: 42% 18px;
+  scrollbar-width: none;
+}
+
+.ytml-line {
+  color: rgba(255, 255, 255, 0.36);
+  font-size: clamp(17px, 2.1vh, 24px);
+  font-weight: 750;
+  line-height: 1.22;
+  margin: 14px 0;
+  transform: scale(0.96);
+  transform-origin: left center;
+  transition: opacity 190ms ease, transform 190ms ease;
+}
+
+.ytml-line.is-active {
+  color: #fff;
+  opacity: 1;
+  transform: scale(1.08);
 }

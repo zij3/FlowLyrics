@@ -6,6 +6,7 @@ An unpacked Chrome extension that adds mobile-style animated lyrics to YouTube M
 
 - Detects the current YouTube Music track from the player bar.
 - Fetches synced LRC lyrics from LRCLIB when available.
+- Renders an animated lyric overlay synchronized to playback.
 
 ## Install
 
