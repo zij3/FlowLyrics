@@ -7,6 +7,7 @@ An unpacked Chrome extension that adds a mobile-style animated lyric panel to Yo
 - Detects the current YouTube Music track from the player bar and media session.
 - Fetches synced LRC lyrics from LRCLIB when available.
 - Animates the active lyric line against the real `<video>` playback time.
+- Saves a timing offset for synced lyrics with small and large adjustment steps.
 - Leaves YouTube Music's static lyrics alone when synced lyrics are not available.
 
 ## Install

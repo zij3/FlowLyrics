@@ -9,6 +9,7 @@
   const {
     LyricsOverlay,
     lyricsService,
+    offsetController,
     playerPage,
     playbackWatcher,
     trackReader,
@@ -24,6 +25,7 @@
     lyricsRequestId: 0,
     missingMetadataSince: 0,
     nativePaneHoldUntil: 0,
+    offsetSeconds: offsetController.loadOffset(),
     placementQueued: false,
     rafId: 0,
     scanQueued: false,
@@ -32,8 +34,11 @@
   };
 
   const overlay = new LyricsOverlay({
+    formatOffset: offsetController.formatOffset,
+    onOffsetChange: handleOffsetChange,
     onShown: () => syncToCurrentLyric(true)
   });
+  overlay.setOffset(state.offsetSeconds);
 
   init();
 
@@ -214,6 +219,23 @@
     return requestKey === state.trackKey && requestId === state.lyricsRequestId;
   }
 
+  function handleOffsetChange(action) {
+    if (action === "reset") {
+      state.offsetSeconds = offsetController.saveOffset(0);
+    } else if (action === "increase-large") {
+      state.offsetSeconds = offsetController.saveOffset(offsetController.adjustOffset(state.offsetSeconds, 1, offsetController.JUMP_SECONDS));
+    } else if (action === "decrease-large") {
+      state.offsetSeconds = offsetController.saveOffset(offsetController.adjustOffset(state.offsetSeconds, -1, offsetController.JUMP_SECONDS));
+    } else if (action === "increase") {
+      state.offsetSeconds = offsetController.saveOffset(offsetController.adjustOffset(state.offsetSeconds, 1));
+    } else if (action === "decrease") {
+      state.offsetSeconds = offsetController.saveOffset(offsetController.adjustOffset(state.offsetSeconds, -1));
+    }
+
+    overlay.setOffset(state.offsetSeconds);
+    syncToCurrentLyric(true);
+  }
+
   function clearLyrics() {
     state.activeIndex = -1;
     state.hasSyncedLyrics = false;
@@ -232,11 +254,15 @@
       return;
     }
 
-    const nextIndex = findActiveIndex(readSyncTime(video), state.lines);
+    const nextIndex = findActiveIndex(readOffsetSyncTime(video), state.lines);
     if (forceScroll || nextIndex !== state.activeIndex) {
       state.activeIndex = nextIndex;
       overlay.updateActiveLine(nextIndex, forceScroll);
     }
+  }
+
+  function readOffsetSyncTime(video) {
+    return Math.max(0, readSyncTime(video) - state.offsetSeconds);
   }
 
   function readSyncTime(video) {
@@ -285,6 +311,7 @@
     const visible = Boolean(playerOpen && lyricsSelected && hostRect && isReplacingLyricsPane());
 
     overlay.setLoading(state.loading);
+    overlay.setOffsetControlsVisible(state.hasSyncedLyrics && state.lines.length);
     overlay.updatePlacement({
       hostRect,
       playerOpen,

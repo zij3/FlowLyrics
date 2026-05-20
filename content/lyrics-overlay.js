@@ -2,9 +2,11 @@
   "use strict";
 
   class LyricsOverlay {
-    constructor({ onShown } = {}) {
+    constructor({ formatOffset, onOffsetChange, onShown } = {}) {
       this.elements = {};
+      this.formatOffset = formatOffset || ((offsetSeconds) => `${offsetSeconds.toFixed(1)}s`);
       this.lastPlacement = "";
+      this.onOffsetChange = onOffsetChange;
       this.onShown = onShown;
       this.visible = false;
 
@@ -37,6 +39,14 @@
 
     setLoading(loading) {
       this.elements.root.classList.toggle("ytml-loading", Boolean(loading));
+    }
+
+    setOffset(offsetSeconds) {
+      this.elements.offsetValue.textContent = this.formatOffset(offsetSeconds);
+    }
+
+    setOffsetControlsVisible(visible) {
+      this.elements.root.classList.toggle("ytml-has-offset-controls", Boolean(visible));
     }
 
     updatePlacement({ hostRect, playerOpen, visible }) {
@@ -86,6 +96,13 @@
       root.id = "ytml-root";
       root.innerHTML = `
         <section class="ytml-panel" aria-live="polite">
+          <div class="ytml-offset" aria-label="Lyric timing offset">
+            <button class="ytml-offset-button ytml-offset-jump" type="button" data-offset-action="decrease-large" aria-label="Show lyrics 1 second earlier" title="Show lyrics 1 second earlier">-1</button>
+            <button class="ytml-offset-button" type="button" data-offset-action="decrease" aria-label="Show lyrics 0.1 seconds earlier" title="Show lyrics 0.1 seconds earlier">-</button>
+            <button class="ytml-offset-value" type="button" data-offset-action="reset" aria-label="Reset lyric offset" title="Reset lyric offset">0.0s</button>
+            <button class="ytml-offset-button" type="button" data-offset-action="increase" aria-label="Show lyrics 0.1 seconds later" title="Show lyrics 0.1 seconds later">+</button>
+            <button class="ytml-offset-button ytml-offset-jump" type="button" data-offset-action="increase-large" aria-label="Show lyrics 1 second later" title="Show lyrics 1 second later">+1</button>
+          </div>
           <main class="ytml-body">
             <div class="ytml-lines" role="list"></div>
           </main>
@@ -96,6 +113,14 @@
 
       this.elements.root = root;
       this.elements.lines = root.querySelector(".ytml-lines");
+      this.elements.offsetValue = root.querySelector(".ytml-offset-value");
+
+      root.querySelector(".ytml-offset").addEventListener("click", (event) => {
+        const action = event.target.closest("[data-offset-action]")?.dataset.offsetAction;
+        if (action) {
+          this.onOffsetChange?.(action);
+        }
+      });
     }
 
     setVisible(visible) {

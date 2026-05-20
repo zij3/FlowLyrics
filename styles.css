@@ -57,6 +57,68 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
   width: 100%;
 }
 
+.ytml-offset {
+  align-items: center;
+  background: rgba(18, 18, 18, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  display: inline-flex;
+  gap: 2px;
+  opacity: 0;
+  padding: 3px;
+  pointer-events: none;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  transition: opacity 160ms ease;
+  z-index: 2;
+}
+
+#ytml-root.ytml-has-offset-controls .ytml-offset {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ytml-offset-button,
+.ytml-offset-value {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.86);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  height: 28px;
+  justify-content: center;
+  line-height: 1;
+  margin: 0;
+  min-width: 28px;
+  padding: 0 8px;
+}
+
+.ytml-offset-jump {
+  min-width: 34px;
+}
+
+.ytml-offset-value {
+  color: rgba(255, 255, 255, 0.72);
+  font-variant-numeric: tabular-nums;
+  min-width: 52px;
+}
+
+.ytml-offset-button:hover,
+.ytml-offset-value:hover,
+.ytml-offset-button:focus-visible,
+.ytml-offset-value:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  outline: none;
+}
+
 .ytml-body,
 .ytml-lines {
   position: relative;
@@ -125,6 +187,7 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
 
 @media (prefers-reduced-motion: reduce) {
   .ytml-panel,
+  .ytml-offset,
   .ytml-line {
     transition: none;
   }
