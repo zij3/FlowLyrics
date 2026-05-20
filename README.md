@@ -1,8 +1,38 @@
 # YouTube Music Animated Lyrics
 
+Download the extension ZIP:
+[youtube-music-animated-lyrics-0.2.0.zip](https://github.com/zij3/youtube-music-animated-lyrics/raw/main/dist/youtube-music-animated-lyrics-0.2.0.zip)
+
 A Chrome extension for YouTube Music that replaces the native Lyrics tab with animated synced lyrics when LRCLIB has synced LRC lyrics for the current track.
 
-This extension is distributed as a downloadable ZIP from GitHub. It is not currently published on the Chrome Web Store, so it must be installed with Chrome's "Load unpacked" developer-mode flow.
+This extension is distributed from GitHub instead of the Chrome Web Store, so it must be installed with Chrome's "Load unpacked" developer-mode flow.
+
+## Install
+
+1. Download the ZIP above.
+2. Extract it somewhere you want to keep the extension.
+   - Do not delete the extracted folder after installing. Chrome loads the extension from that folder.
+3. Open Chrome and go to:
+   `chrome://extensions`
+4. Enable Developer mode in the top-right corner.
+5. Click Load unpacked.
+6. Select the extracted folder that contains `manifest.json`.
+7. Open or refresh:
+   `https://music.youtube.com`
+
+Open the full player and click YouTube Music's Lyrics tab. When synced lyrics are available, the extension replaces the static lyrics pane with animated synced lyrics. If synced lyrics are not available, YouTube Music's own static lyrics stay visible.
+
+## Updating
+
+Chrome will not update this extension automatically because it is not installed from the Chrome Web Store.
+
+To update:
+
+1. Download the latest ZIP from this repository.
+2. Extract it over the old folder, or extract it to a new folder.
+3. Go to `chrome://extensions`.
+4. Click the reload button on the YouTube Music Animated Lyrics extension.
+5. Refresh YouTube Music.
 
 ## What It Does
 
@@ -12,49 +42,40 @@ This extension is distributed as a downloadable ZIP from GitHub. It is not curre
 - Saves a timing offset for synced lyrics with small and large adjustment steps.
 - Leaves YouTube Music's static lyrics alone when synced lyrics are not available.
 
-## Install From GitHub ZIP
+## Repository Layout
 
-1. Download the extension ZIP from this repository.
-   - Recommended: open `dist/youtube-music-animated-lyrics-0.2.0.zip`, then choose Download raw.
-   - If a release is available, download the latest release ZIP from the repository's Releases page.
-   - You can also use GitHub's Code -> Download ZIP option, then load the extracted repository folder.
-2. Extract the ZIP somewhere you want to keep the extension.
-   - Do not delete the extracted folder after installing. Chrome loads the extension from that folder.
-3. Open Chrome and go to:
-   `chrome://extensions`
-4. Enable Developer mode in the top-right corner.
-5. Click Load unpacked.
-6. Select the extracted extension folder that contains `manifest.json`.
-7. Open or refresh:
-   `https://music.youtube.com`
+- `src/` contains the unpacked Chrome extension source. For local development, load this folder in Chrome.
+- `dist/` contains downloadable release ZIPs. The ZIP contents put `manifest.json` at the archive root, which is what Chrome expects.
+- `scripts/package-extension.ps1` rebuilds the release ZIP from `src/`.
 
-Open the full player and click YouTube Music's Lyrics tab. When synced lyrics are available, the extension replaces the static lyrics pane with animated synced lyrics. If synced lyrics are not available, YouTube Music's own static lyrics stay visible.
+This keeps the source clean while still making the downloadable ZIP easy to find.
 
-## Updating
+## Development Install
 
-Because this is not installed from the Chrome Web Store, Chrome will not update it automatically.
+For local development, load the source folder directly:
 
-To update:
+1. Open `chrome://extensions`.
+2. Enable Developer mode.
+3. Click Load unpacked.
+4. Select this folder:
+   `src`
+5. Refresh YouTube Music after code changes.
 
-1. Download the newer ZIP from GitHub.
-2. Extract it over the old folder, or extract it to a new folder.
-3. Go to `chrome://extensions`.
-4. Click the reload button on the YouTube Music Animated Lyrics extension.
-5. Refresh YouTube Music.
+## Packaging
 
-## Packaging A Release ZIP
-
-For maintainers, create a release ZIP with `manifest.json` at the root of the archive. Do not include `.git`, local screenshots, browser profiles, or temporary files.
-
-From the project root in PowerShell:
+Run this from the repository root in PowerShell:
 
 ```powershell
-$version = (Get-Content -Raw manifest.json | ConvertFrom-Json).version
-New-Item -ItemType Directory -Force dist
-Compress-Archive -Path manifest.json,background.js,content.js,styles.css,README.md,content -DestinationPath "dist\youtube-music-animated-lyrics-$version.zip" -Force
+.\scripts\package-extension.ps1
 ```
 
-Commit the ZIP under `dist/`, or upload it as a GitHub release asset. Users should download that ZIP, extract it, and load the extracted folder in Chrome.
+The script reads the version from `src/manifest.json` and writes:
+
+```text
+dist/youtube-music-animated-lyrics-<version>.zip
+```
+
+Upload that ZIP to GitHub, or commit it under `dist/` for direct downloads from the repository.
 
 ## Privacy
 
