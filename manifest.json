@@ -3,11 +3,9 @@
   "name": "YouTube Music Animated Lyrics",
   "description": "Adds mobile-style animated synced lyrics to YouTube Music.",
   "version": "0.1.0",
-  "permissions": [
-    "storage"
-  ],
   "host_permissions": [
-    "https://music.youtube.com/*"
+    "https://music.youtube.com/*",
+    "https://lrclib.net/*"
   ],
   "background": {
     "service_worker": "background.js"

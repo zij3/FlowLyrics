@@ -1,14 +1,12 @@
 # YouTube Music Animated Lyrics
 
-An unpacked Chrome extension for experimenting with animated synced lyrics on YouTube Music.
+An unpacked Chrome extension that adds mobile-style animated lyrics to YouTube Music.
+
+## What It Does
+
+- Detects the current YouTube Music track from the player bar.
+- Fetches synced LRC lyrics from LRCLIB when available.
 
 ## Install
 
-1. Open `chrome://extensions`.
-2. Enable Developer mode.
-3. Choose Load unpacked.
-4. Select this folder.
-
-## Notes
-
-The extension starts as a small content-script scaffold and grows into a Lyrics-tab replacement.
+Load this folder as an unpacked extension from `chrome://extensions`.
