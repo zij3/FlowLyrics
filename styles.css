@@ -80,14 +80,16 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
 
 .ytml-line {
   color: var(--ytml-muted);
-  font-size: clamp(17px, 2.1vh, 24px);
+  font-size: clamp(20px, 2.45vh, 29px);
   font-weight: 750;
   line-height: 1.2;
-  margin: 14px 0;
+  margin: 16px 0;
+  transform: scale(1.08);
+  transform-origin: left center;
   min-height: 1.2em;
   opacity: 0.46;
   overflow-wrap: anywhere;
-  transition: color 190ms ease, font-weight 190ms ease, opacity 190ms ease;
+  transition: color 190ms ease, opacity 190ms ease, transform 190ms ease;
 }
 
 .ytml-line span {
@@ -114,7 +116,7 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
 
 @media (max-width: 900px) {
   .ytml-line {
-    font-size: 20px;
+    font-size: 23px;
   }
 }
 
