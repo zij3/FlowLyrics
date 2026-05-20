@@ -10,7 +10,16 @@ if (-not (Test-Path $manifestPath)) {
 
 $version = (Get-Content -Raw $manifestPath | ConvertFrom-Json).version
 $zipPath = Join-Path $repoRoot "youtube-music-animated-lyrics-$version.zip"
+$archivePaths = @(
+  (Join-Path $srcDir "*"),
+  (Join-Path $repoRoot "README.md")
+)
 
-Compress-Archive -Path (Join-Path $srcDir "*"), (Join-Path $repoRoot "README.md") -DestinationPath $zipPath -Force
+$assetsDir = Join-Path $repoRoot "assets"
+if (Test-Path $assetsDir) {
+  $archivePaths += $assetsDir
+}
+
+Compress-Archive -Path $archivePaths -DestinationPath $zipPath -Force
 
 Write-Host "Created $zipPath"

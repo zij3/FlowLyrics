@@ -3,6 +3,8 @@
 Download the extension ZIP:
 [youtube-music-animated-lyrics-0.2.0.zip](https://github.com/zij3/youtube-music-animated-lyrics/raw/main/youtube-music-animated-lyrics-0.2.0.zip)
 
+![YouTube Music Animated Lyrics preview](assets/preview.png)
+
 A Chrome extension for YouTube Music that replaces the native Lyrics tab with animated synced lyrics when LRCLIB has synced LRC lyrics for the current track.
 
 This extension is distributed from GitHub instead of the Chrome Web Store, so it must be installed with Chrome's "Load unpacked" developer-mode flow.
