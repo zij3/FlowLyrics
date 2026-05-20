@@ -27,6 +27,7 @@
     root.querySelector(".ytml-pill").addEventListener("click", () => root.classList.toggle("ytml-open"));
     scanTrack(true);
     setInterval(() => scanTrack(false), SCAN_INTERVAL_MS);
+    document.addEventListener("visibilitychange", () => scanTrack(false), true);
     requestAnimationFrame(syncLoop);
   }
 
