@@ -1,20 +1,25 @@
 (() => {
   "use strict";
 
+  const FRESH_TRACK_GUARD_MS = 5000;
+  const STALE_HANDOFF_TIME_SECONDS = 20;
   const SCAN_INTERVAL_MS = 1300;
   const {
     LyricsOverlay,
     lyricsService,
     playerPage,
+    playbackWatcher,
     trackReader,
     utils
   } = globalThis.YTML;
 
   const state = {
     activeIndex: -1,
+    freshTrackGuardUntil: 0,
     hasSyncedLyrics: false,
     lines: [],
     loading: false,
+    lyricsRequestId: 0,
     placementQueued: false,
     rafId: 0,
     scanQueued: false,
@@ -33,6 +38,10 @@
       onCloseRequested: () => overlay.hideImmediately(),
       onPlacementRequested: schedulePlacementUpdate,
       onScanRequested: scheduleScan
+    });
+    playbackWatcher.observePlayback({
+      onPlaybackReady: scheduleScan,
+      onTrackBoundary: handleTrackBoundary
     });
 
     scanTrack(true);
@@ -66,8 +75,15 @@
   }
 
   function scanTrack(force) {
+    const video = utils.getVideo();
     const track = trackReader.readTrack();
     updatePlacement();
+
+    if (!force && video?.ended) {
+      resetTrack();
+      updatePlacement();
+      return;
+    }
 
     if (!track.title || !track.artist) {
       resetTrack();
@@ -82,19 +98,21 @@
 
     state.track = track;
     state.trackKey = nextKey;
+    state.freshTrackGuardUntil = performance.now() + FRESH_TRACK_GUARD_MS;
     clearLyrics();
     updatePlacement();
-    loadLyricsForTrack(track, nextKey);
+    loadLyricsForTrack(track, nextKey, ++state.lyricsRequestId);
   }
 
-  async function loadLyricsForTrack(track, requestKey) {
+  async function loadLyricsForTrack(track, requestKey, requestId) {
+    let shouldSync = false;
     state.loading = true;
     clearLyrics();
     updatePlacement();
 
     try {
       const lines = await lyricsService.loadSyncedLines(track, false);
-      if (requestKey !== state.trackKey) {
+      if (!isCurrentLyricsRequest(requestKey, requestId)) {
         return;
       }
 
@@ -102,17 +120,33 @@
         state.lines = lines;
         state.hasSyncedLyrics = true;
         overlay.renderLines(lines);
+        shouldSync = true;
       }
     } catch (_error) {
-      if (requestKey === state.trackKey) {
+      if (isCurrentLyricsRequest(requestKey, requestId)) {
         clearLyrics();
       }
     } finally {
-      if (requestKey === state.trackKey) {
+      if (isCurrentLyricsRequest(requestKey, requestId)) {
         state.loading = false;
         updatePlacement();
+        if (shouldSync) {
+          syncToCurrentLyric(true);
+        }
       }
     }
+  }
+
+  function handleTrackBoundary() {
+    state.lyricsRequestId += 1;
+    state.freshTrackGuardUntil = performance.now() + FRESH_TRACK_GUARD_MS;
+    state.loading = false;
+    resetTrack();
+    updatePlacement();
+  }
+
+  function isCurrentLyricsRequest(requestKey, requestId) {
+    return requestKey === state.trackKey && requestId === state.lyricsRequestId;
   }
 
   function resetTrack() {
@@ -136,15 +170,35 @@
 
   function syncToCurrentLyric(forceScroll) {
     const video = utils.getVideo();
-    if (!video || !state.lines.length) {
+    if (!video || video.ended || !state.lines.length) {
       return;
     }
 
-    const nextIndex = findActiveIndex(video.currentTime || 0, state.lines);
+    const nextIndex = findActiveIndex(readSyncTime(video), state.lines);
     if (forceScroll || nextIndex !== state.activeIndex) {
       state.activeIndex = nextIndex;
       overlay.updateActiveLine(nextIndex, forceScroll);
     }
+  }
+
+  function readSyncTime(video) {
+    const playerBarTime = trackReader.readPlaybackTime();
+    const hasPlayerBarTime = Number.isFinite(playerBarTime);
+    const time = hasPlayerBarTime ? playerBarTime : video.currentTime || 0;
+
+    if (
+      !hasPlayerBarTime
+      && performance.now() < state.freshTrackGuardUntil
+      && time > STALE_HANDOFF_TIME_SECONDS
+    ) {
+      return 0;
+    }
+
+    if (time <= STALE_HANDOFF_TIME_SECONDS) {
+      state.freshTrackGuardUntil = 0;
+    }
+
+    return time;
   }
 
   function findActiveIndex(time, lines) {

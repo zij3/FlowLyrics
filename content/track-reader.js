@@ -18,7 +18,7 @@
       .filter(Boolean);
 
     return {
-      title: cleanText(domTitle || media.title || ""),
+      title: cleanText(media.title || domTitle || ""),
       artist: cleanText(media.artist || bylineParts[0] || linkedArtists.join(", ")),
       album: cleanText(media.album || bylineParts[1] || ""),
       duration: getDuration(video, bar)
@@ -45,7 +45,15 @@
     return match ? parseClock(match[1]) : 0;
   }
 
+  function readPlaybackTime() {
+    const bar = document.querySelector("ytmusic-player-bar");
+    const timeText = textFrom(bar?.querySelector(".time-info"));
+    const match = timeText.match(/^\s*([0-9:]+)\s*(?:\/|$)/);
+    return match ? parseClock(match[1]) : null;
+  }
+
   globalThis.YTML.trackReader = {
+    readPlaybackTime,
     readTrack
   };
 })();

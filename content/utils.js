@@ -21,7 +21,39 @@
   }
 
   function getVideo() {
-    return document.querySelector("video");
+    return getVideos()
+      .map((video) => ({
+        video,
+        score: scoreVideo(video)
+      }))
+      .sort((a, b) => b.score - a.score)[0]?.video || null;
+  }
+
+  function getVideos() {
+    return [...document.querySelectorAll("video")];
+  }
+
+  function scoreVideo(video) {
+    if (!video || !video.isConnected) {
+      return -1;
+    }
+
+    const rect = video.getBoundingClientRect();
+    const style = getComputedStyle(video);
+    const visible = style.display !== "none"
+      && style.visibility !== "hidden"
+      && rect.width > 0
+      && rect.height > 0;
+
+    let score = 0;
+    if (video.readyState > 0) score += 20;
+    if (Number.isFinite(video.duration) && video.duration > 0) score += 20;
+    if (video.currentSrc || video.src) score += 15;
+    if (!video.paused) score += 35;
+    if (!video.ended) score += 45;
+    if (visible) score += 10;
+
+    return score;
   }
 
   function buildTrackKey(track) {
@@ -64,6 +96,7 @@
     buildTrackKey,
     cleanText,
     getVideo,
+    getVideos,
     normalizeComparable,
     parseClock,
     sendRuntimeMessage,

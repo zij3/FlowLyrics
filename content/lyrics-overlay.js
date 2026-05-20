@@ -13,6 +13,7 @@
 
     clearLines() {
       this.elements.lines.textContent = "";
+      this.elements.lines.scrollTop = 0;
     }
 
     renderLines(lines) {
