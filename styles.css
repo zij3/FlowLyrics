@@ -1,8 +1,3 @@
 #ytml-root {
-  position: fixed;
-  right: 24px;
-  bottom: 96px;
-  z-index: 2147483647;
-  color: #fff;
-  font-family: Roboto, Arial, sans-serif;
+  display: none;
 }
