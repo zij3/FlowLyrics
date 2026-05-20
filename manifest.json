@@ -16,6 +16,12 @@
         "https://music.youtube.com/*"
       ],
       "js": [
+        "content/namespace.js",
+        "content/utils.js",
+        "content/track-reader.js",
+        "content/lyrics-service.js",
+        "content/lyrics-overlay.js",
+        "content/player-page.js",
         "content.js"
       ],
       "css": [

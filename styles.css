@@ -38,6 +38,10 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
   visibility: visible;
 }
 
+#ytml-root.ytml-fast-hide {
+  transition: none;
+}
+
 .ytml-panel {
   background: var(--ytml-bg);
   border: 0;
