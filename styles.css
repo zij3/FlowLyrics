@@ -84,12 +84,11 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
   font-weight: 750;
   line-height: 1.2;
   margin: 16px 0;
-  transform: scale(1.08);
-  transform-origin: left center;
+  max-width: 100%;
   min-height: 1.2em;
   opacity: 0.46;
   overflow-wrap: anywhere;
-  transition: color 190ms ease, opacity 190ms ease, transform 190ms ease;
+  transition: color 190ms ease, font-weight 190ms ease, opacity 190ms ease;
 }
 
 .ytml-line span {
@@ -106,7 +105,7 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
 }
 
 .ytml-line.is-active {
-
+  font-weight: 850;
   opacity: 1;
 }
 
