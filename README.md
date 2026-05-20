@@ -1,7 +1,7 @@
 # YouTube Music Animated Lyrics
 
 Download the extension ZIP:
-[youtube-music-animated-lyrics-0.2.0.zip](https://github.com/zij3/youtube-music-animated-lyrics/raw/main/dist/youtube-music-animated-lyrics-0.2.0.zip)
+[youtube-music-animated-lyrics-0.2.0.zip](https://github.com/zij3/youtube-music-animated-lyrics/raw/main/youtube-music-animated-lyrics-0.2.0.zip)
 
 A Chrome extension for YouTube Music that replaces the native Lyrics tab with animated synced lyrics when LRCLIB has synced LRC lyrics for the current track.
 
@@ -45,10 +45,10 @@ To update:
 ## Repository Layout
 
 - `src/` contains the unpacked Chrome extension source. For local development, load this folder in Chrome.
-- `dist/` contains downloadable release ZIPs. The ZIP contents put `manifest.json` at the archive root, which is what Chrome expects.
+- `youtube-music-animated-lyrics-<version>.zip` is the downloadable extension package at the repository root.
 - `scripts/package-extension.ps1` rebuilds the release ZIP from `src/`.
 
-This keeps the source clean while still making the downloadable ZIP easy to find.
+This keeps the source clean while making the downloadable ZIP the first thing people see.
 
 ## Development Install
 
@@ -72,10 +72,10 @@ Run this from the repository root in PowerShell:
 The script reads the version from `src/manifest.json` and writes:
 
 ```text
-dist/youtube-music-animated-lyrics-<version>.zip
+youtube-music-animated-lyrics-<version>.zip
 ```
 
-Upload that ZIP to GitHub, or commit it under `dist/` for direct downloads from the repository.
+Commit that ZIP at the repository root for direct downloads from GitHub.
 
 ## Privacy
 
