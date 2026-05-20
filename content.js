@@ -2,6 +2,8 @@
   "use strict";
 
   const FRESH_TRACK_GUARD_MS = 5000;
+  const METADATA_GAP_GRACE_MS = 2500;
+  const NATIVE_PANE_HOLD_MS = 5000;
   const STALE_HANDOFF_TIME_SECONDS = 20;
   const SCAN_INTERVAL_MS = 1300;
   const {
@@ -20,6 +22,8 @@
     lines: [],
     loading: false,
     lyricsRequestId: 0,
+    missingMetadataSince: 0,
+    nativePaneHoldUntil: 0,
     placementQueued: false,
     rafId: 0,
     scanQueued: false,
@@ -80,17 +84,28 @@
     updatePlacement();
 
     if (!force && video?.ended) {
-      resetTrack();
+      if (state.trackKey || state.hasSyncedLyrics || state.lines.length) {
+        handleTrackBoundary();
+      } else if (!isNativePaneHeld()) {
+        resetTrack();
+      }
+
       updatePlacement();
       return;
     }
 
     if (!track.title || !track.artist) {
+      if (waitForTransientMetadata()) {
+        updatePlacement();
+        return;
+      }
+
       resetTrack();
       updatePlacement();
       return;
     }
 
+    state.missingMetadataSince = 0;
     const nextKey = utils.buildTrackKey(track);
     if (!force && nextKey === state.trackKey) {
       return;
@@ -99,6 +114,8 @@
     state.track = track;
     state.trackKey = nextKey;
     state.freshTrackGuardUntil = performance.now() + FRESH_TRACK_GUARD_MS;
+    state.loading = true;
+    holdNativePane();
     clearLyrics();
     updatePlacement();
     loadLyricsForTrack(track, nextKey, ++state.lyricsRequestId);
@@ -119,11 +136,15 @@
       if (lines.length) {
         state.lines = lines;
         state.hasSyncedLyrics = true;
+        state.nativePaneHoldUntil = 0;
         overlay.renderLines(lines);
         shouldSync = true;
+      } else {
+        state.nativePaneHoldUntil = 0;
       }
     } catch (_error) {
       if (isCurrentLyricsRequest(requestKey, requestId)) {
+        state.nativePaneHoldUntil = 0;
         clearLyrics();
       }
     } finally {
@@ -141,19 +162,56 @@
     state.lyricsRequestId += 1;
     state.freshTrackGuardUntil = performance.now() + FRESH_TRACK_GUARD_MS;
     state.loading = false;
-    resetTrack();
+    state.track = null;
+    state.trackKey = "";
+    holdNativePane();
+    clearLyrics();
     updatePlacement();
   }
 
-  function isCurrentLyricsRequest(requestKey, requestId) {
-    return requestKey === state.trackKey && requestId === state.lyricsRequestId;
+  function waitForTransientMetadata() {
+    const canWait = state.trackKey || state.hasSyncedLyrics || state.loading || isNativePaneHeld();
+    if (!canWait) {
+      state.missingMetadataSince = 0;
+      return false;
+    }
+
+    const now = performance.now();
+    if (!state.missingMetadataSince) {
+      state.missingMetadataSince = now;
+    }
+
+    if (now - state.missingMetadataSince > METADATA_GAP_GRACE_MS) {
+      state.missingMetadataSince = 0;
+      return false;
+    }
+
+    holdNativePane(METADATA_GAP_GRACE_MS);
+    return true;
+  }
+
+  function holdNativePane(duration = NATIVE_PANE_HOLD_MS) {
+    state.nativePaneHoldUntil = Math.max(state.nativePaneHoldUntil, performance.now() + duration);
+  }
+
+  function isNativePaneHeld() {
+    return performance.now() < state.nativePaneHoldUntil;
+  }
+
+  function isReplacingLyricsPane() {
+    return state.loading || isNativePaneHeld() || (state.hasSyncedLyrics && state.lines.length);
   }
 
   function resetTrack() {
     state.track = null;
     state.trackKey = "";
     state.loading = false;
+    state.nativePaneHoldUntil = 0;
     clearLyrics();
+  }
+
+  function isCurrentLyricsRequest(requestKey, requestId) {
+    return requestKey === state.trackKey && requestId === state.lyricsRequestId;
   }
 
   function clearLyrics() {
@@ -224,7 +282,7 @@
     const playerOpen = playerPage.isPlayerPageOpen(playerPageElement);
     const lyricsSelected = playerPage.isLyricsTabSelected();
     const hostRect = playerPage.getLyricsHostRect(playerPageElement);
-    const visible = Boolean(playerOpen && lyricsSelected && hostRect && state.hasSyncedLyrics && state.lines.length);
+    const visible = Boolean(playerOpen && lyricsSelected && hostRect && isReplacingLyricsPane());
 
     overlay.setLoading(state.loading);
     overlay.updatePlacement({
