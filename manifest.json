@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YouTube Music Animated Lyrics",
   "description": "Adds mobile-style animated synced lyrics to YouTube Music.",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "host_permissions": [
     "https://music.youtube.com/*",
     "https://lrclib.net/*"

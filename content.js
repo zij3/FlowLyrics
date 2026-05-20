@@ -45,14 +45,9 @@
   }
 
   function setPanelVisible(visible) {
-    const wasVisible = state.visible;
     state.visible = Boolean(visible);
     elements.root.classList.toggle("ytml-visible", state.visible);
     document.documentElement.classList.toggle("ytml-replacing-lyrics", state.visible);
-
-    if (state.visible && !wasVisible) {
-      syncToCurrentLyric(true);
-    }
   }
 
   function observePage() {
@@ -265,22 +260,16 @@
   }
 
   function syncLoop() {
-    syncToCurrentLyric(false);
+    const video = getVideo();
+    if (video && state.lines.length) {
+      const nextIndex = findActiveIndex(video.currentTime || 0, state.lines);
+      if (nextIndex !== state.activeIndex) {
+        state.activeIndex = nextIndex;
+        updateActiveLine(nextIndex);
+      }
+    }
 
     state.rafId = requestAnimationFrame(syncLoop);
-  }
-
-  function syncToCurrentLyric(forceScroll) {
-    const video = getVideo();
-    if (!video || !state.lines.length) {
-      return;
-    }
-
-    const nextIndex = findActiveIndex(video.currentTime || 0, state.lines);
-    if (forceScroll || nextIndex !== state.activeIndex) {
-      state.activeIndex = nextIndex;
-      updateActiveLine(nextIndex, forceScroll);
-    }
   }
 
   function findActiveIndex(time, lines) {
@@ -301,7 +290,7 @@
     return answer;
   }
 
-  function updateActiveLine(activeIndex, forceScroll) {
+  function updateActiveLine(activeIndex) {
     for (const lineElement of elements.lines.querySelectorAll(".ytml-line")) {
       const index = Number(lineElement.dataset.index);
       lineElement.classList.toggle("is-active", index === activeIndex);
@@ -311,18 +300,18 @@
 
     const activeElement = elements.lines.querySelector(`.ytml-line[data-index="${activeIndex}"]`);
     if (activeElement) {
-      scrollLyricListTo(activeElement, forceScroll);
+      scrollLyricListTo(activeElement);
     }
   }
 
-  function scrollLyricListTo(activeElement, instant) {
+  function scrollLyricListTo(activeElement) {
     const targetTop = activeElement.offsetTop
       - (elements.lines.clientHeight / 2)
       + (activeElement.offsetHeight / 2);
 
     elements.lines.scrollTo({
       top: Math.max(0, targetTop),
-      behavior: instant ? "auto" : "smooth"
+      behavior: "smooth"
     });
   }
 
