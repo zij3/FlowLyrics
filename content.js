@@ -97,7 +97,13 @@
       const index = Number(line.dataset.index);
       line.classList.toggle("is-active", index === activeIndex);
     }
-    elements.lines.querySelector(".is-active")?.scrollIntoView({ block: "center", behavior: "smooth" });
+    const active = elements.lines.querySelector(".is-active");
+    if (active) {
+      elements.lines.scrollTo({
+        top: Math.max(0, active.offsetTop - elements.lines.clientHeight / 2 + active.offsetHeight / 2),
+        behavior: "smooth"
+      });
+    }
   }
 
   function textFrom(node) {

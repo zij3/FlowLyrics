@@ -35,12 +35,14 @@
 
 .ytml-header,
 .ytml-footer {
-  padding: 18px;
+  padding: 22px 20px 12px;
 }
 
 .ytml-lines {
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 42% 18px;
+  scroll-padding-block: 42%;
   scrollbar-width: none;
 }
 
