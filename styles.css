@@ -50,13 +50,10 @@
   font-weight: 750;
   line-height: 1.22;
   margin: 14px 0;
-  transform: scale(0.96);
-  transform-origin: left center;
-  transition: opacity 190ms ease, transform 190ms ease;
+  transition: color 190ms ease, opacity 190ms ease;
 }
 
 .ytml-line.is-active {
   color: #fff;
   opacity: 1;
-  transform: scale(1.08);
 }
