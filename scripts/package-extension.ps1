@@ -9,7 +9,7 @@ if (-not (Test-Path $manifestPath)) {
 }
 
 $version = (Get-Content -Raw $manifestPath | ConvertFrom-Json).version
-$zipPath = Join-Path $repoRoot "youtube-music-animated-lyrics-$version.zip"
+$zipPath = Join-Path $repoRoot "FlowLyrics-$version.zip"
 $archivePaths = @(
   (Join-Path $srcDir "*"),
   (Join-Path $repoRoot "README.md")

@@ -1,11 +1,11 @@
-# YouTube Music Animated Lyrics
+# FlowLyrics
 
 Download the extension ZIP:
-[youtube-music-animated-lyrics-0.2.0.zip](https://github.com/zij3/youtube-music-animated-lyrics/raw/main/youtube-music-animated-lyrics-0.2.0.zip)
+[FlowLyrics-0.2.0.zip](FlowLyrics-0.2.0.zip)
 
-![YouTube Music Animated Lyrics preview](assets/preview.png)
+![FlowLyrics for YouTube Music preview](assets/preview.png)
 
-A Chrome extension for YouTube Music that replaces the native Lyrics tab with animated synced lyrics when LRCLIB has synced LRC lyrics for the current track.
+FlowLyrics for YouTube Music is a Chrome extension that replaces the native Lyrics tab with animated synced lyrics when LRCLIB has synced LRC lyrics for the current track.
 
 This extension is distributed from GitHub instead of the Chrome Web Store, so it must be installed with Chrome's "Load unpacked" developer-mode flow.
 
@@ -33,7 +33,7 @@ To update:
 1. Download the latest ZIP from this repository.
 2. Extract it over the old folder, or extract it to a new folder.
 3. Go to `chrome://extensions`.
-4. Click the reload button on the YouTube Music Animated Lyrics extension.
+4. Click the reload button on the FlowLyrics for YouTube Music extension.
 5. Refresh YouTube Music.
 
 ## What It Does
@@ -47,7 +47,7 @@ To update:
 ## Repository Layout
 
 - `src/` contains the unpacked Chrome extension source. For local development, load this folder in Chrome.
-- `youtube-music-animated-lyrics-<version>.zip` is the downloadable extension package at the repository root.
+- `FlowLyrics-<version>.zip` is the downloadable extension package at the repository root.
 - `scripts/package-extension.ps1` rebuilds the release ZIP from `src/`.
 
 This keeps the source clean while making the downloadable ZIP the first thing people see.
@@ -63,21 +63,6 @@ For local development, load the source folder directly:
    `src`
 5. Refresh YouTube Music after code changes.
 
-## Packaging
-
-Run this from the repository root in PowerShell:
-
-```powershell
-.\scripts\package-extension.ps1
-```
-
-The script reads the version from `src/manifest.json` and writes:
-
-```text
-youtube-music-animated-lyrics-<version>.zip
-```
-
-Commit that ZIP at the repository root for direct downloads from GitHub.
 
 ## Privacy
 

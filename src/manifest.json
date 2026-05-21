@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Music Animated Lyrics",
-  "description": "Adds mobile-style animated synced lyrics to YouTube Music.",
+  "name": "FlowLyrics for YouTube Music",
+  "description": "Adds animated synced lyrics to YouTube Music.",
   "version": "0.2.0",
   "host_permissions": [
     "https://music.youtube.com/*",
