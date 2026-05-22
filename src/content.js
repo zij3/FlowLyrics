@@ -221,6 +221,7 @@
 
   function handlePlayerTransition() {
     holdPlayerTransition();
+    updateNativePaneVisibility(true);
     overlay.hideImmediately();
 
     if (state.playerTransitionTimerId) {
@@ -374,13 +375,16 @@
     const playerOpen = playerPage.isPlayerPageOpen(playerPageElement);
     const lyricsSelected = playerPage.isLyricsTabSelected();
     const hostRect = playerPage.getLyricsHostRect(playerPageElement);
+    const transitionHeld = isPlayerTransitionHeld();
+    const replacingLyricsPane = isReplacingLyricsPane();
     const visible = Boolean(
-      !isPlayerTransitionHeld()
+      !transitionHeld
       && playerOpen
       && lyricsSelected
       && hostRect
-      && isReplacingLyricsPane()
+      && replacingLyricsPane
     );
+    const suppressNativePane = Boolean(visible || (transitionHeld && replacingLyricsPane));
 
     overlay.setLoading(state.loading);
     overlay.setOffsetControlsVisible(state.hasSyncedLyrics && state.lines.length);
@@ -389,5 +393,10 @@
       playerOpen,
       visible
     });
+    updateNativePaneVisibility(suppressNativePane);
+  }
+
+  function updateNativePaneVisibility(hidden) {
+    document.documentElement.classList.toggle("ytml-suppress-native-lyrics", Boolean(hidden));
   }
 })();

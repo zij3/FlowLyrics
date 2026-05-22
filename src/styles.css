@@ -28,7 +28,8 @@
   pointer-events: auto;
 }
 
-html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
+html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer,
+html.ytml-suppress-native-lyrics ytmusic-player-page ytmusic-tab-renderer {
   visibility: hidden !important;
 }
 
