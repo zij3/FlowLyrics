@@ -3,7 +3,16 @@
 Download the extension ZIP:
 [FlowLyrics-0.3.0.zip](FlowLyrics-0.3.0.zip)
 
-![FlowLyrics for YouTube Music preview](assets/preview.png)
+<table>
+  <tr>
+    <td><strong>Before</strong></td>
+    <td><strong>FlowLyrics</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/before.png" alt="YouTube Music native lyrics before FlowLyrics" width="420"></td>
+    <td><img src="assets/preview.png" alt="FlowLyrics animated synced lyrics preview" width="420"></td>
+  </tr>
+</table>
 
 FlowLyrics for YouTube Music is a Chrome extension that replaces the native Lyrics tab with animated synced lyrics when LRCLIB has synced LRC lyrics for the current track.
 
