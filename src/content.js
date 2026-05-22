@@ -4,6 +4,7 @@
   const FRESH_TRACK_GUARD_MS = 5000;
   const METADATA_GAP_GRACE_MS = 2500;
   const NATIVE_PANE_HOLD_MS = 5000;
+  const PLAYER_TRANSITION_HOLD_MS = 300;
   const STALE_HANDOFF_TIME_SECONDS = 20;
   const SCAN_INTERVAL_MS = 1300;
   const {
@@ -27,6 +28,8 @@
     nativePaneHoldUntil: 0,
     offsetSeconds: offsetController.loadOffset(),
     placementQueued: false,
+    playerTransitionHoldUntil: 0,
+    playerTransitionTimerId: 0,
     rafId: 0,
     scanQueued: false,
     track: null,
@@ -45,8 +48,9 @@
 
   function init() {
     playerPage.observePlayerPage({
-      onCloseRequested: () => overlay.hideImmediately(),
+      onCloseRequested: handlePlayerTransition,
       onPlacementRequested: schedulePlacementUpdate,
+      onPlayerTransitionRequested: handlePlayerTransition,
       onScanRequested: scheduleScan
     });
     playbackWatcher.observePlayback({
@@ -204,6 +208,32 @@
     return performance.now() < state.nativePaneHoldUntil;
   }
 
+  function holdPlayerTransition() {
+    state.playerTransitionHoldUntil = Math.max(
+      state.playerTransitionHoldUntil,
+      performance.now() + PLAYER_TRANSITION_HOLD_MS
+    );
+  }
+
+  function isPlayerTransitionHeld() {
+    return performance.now() < state.playerTransitionHoldUntil;
+  }
+
+  function handlePlayerTransition() {
+    holdPlayerTransition();
+    overlay.hideImmediately();
+
+    if (state.playerTransitionTimerId) {
+      clearTimeout(state.playerTransitionTimerId);
+    }
+
+    state.playerTransitionTimerId = setTimeout(() => {
+      state.playerTransitionTimerId = 0;
+      scheduleScan();
+      schedulePlacementUpdate();
+    }, PLAYER_TRANSITION_HOLD_MS);
+  }
+
   function isReplacingLyricsPane() {
     return state.loading || isNativePaneHeld() || (state.hasSyncedLyrics && state.lines.length);
   }
@@ -344,7 +374,13 @@
     const playerOpen = playerPage.isPlayerPageOpen(playerPageElement);
     const lyricsSelected = playerPage.isLyricsTabSelected();
     const hostRect = playerPage.getLyricsHostRect(playerPageElement);
-    const visible = Boolean(playerOpen && lyricsSelected && hostRect && isReplacingLyricsPane());
+    const visible = Boolean(
+      !isPlayerTransitionHeld()
+      && playerOpen
+      && lyricsSelected
+      && hostRect
+      && isReplacingLyricsPane()
+    );
 
     overlay.setLoading(state.loading);
     overlay.setOffsetControlsVisible(state.hasSyncedLyrics && state.lines.length);

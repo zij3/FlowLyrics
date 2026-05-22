@@ -6,14 +6,18 @@
   function observePlayerPage({
     onCloseRequested,
     onPlacementRequested,
+    onPlayerTransitionRequested,
     onScanRequested
   }) {
     const requestPlacement = () => onPlacementRequested?.();
     const requestScan = () => onScanRequested?.();
     const requestClose = () => onCloseRequested?.();
+    const requestPlayerTransition = () => onPlayerTransitionRequested?.();
 
     const handlePlayerAction = (event) => {
-      if (isPlayerCloseAction(event.target)) {
+      if (isPlayerPageToggleAction(event.target)) {
+        requestPlayerTransition();
+      } else if (isPlayerCloseAction(event.target)) {
         requestClose();
       }
 
@@ -22,7 +26,7 @@
 
     const handleKeydown = (event) => {
       if (event.key === "Escape") {
-        requestClose();
+        requestPlayerTransition();
         requestPlacement();
       }
     };
@@ -112,13 +116,22 @@
   }
 
   function isPlayerCloseAction(target) {
+    return Boolean(readPlayerAction(target)?.closes);
+  }
+
+  function isPlayerPageToggleAction(target) {
+    const action = readPlayerAction(target);
+    return Boolean(action?.closes || action?.opens);
+  }
+
+  function readPlayerAction(target) {
     if (!target || !target.closest) {
-      return false;
+      return null;
     }
 
     const control = target.closest("button, tp-yt-paper-icon-button, yt-icon-button, yt-button-renderer, [role='button'], [aria-label], [title]");
     if (!control) {
-      return false;
+      return null;
     }
 
     const playerPage = target.closest("ytmusic-player-page");
@@ -133,9 +146,13 @@
     ].filter(Boolean).join(" ");
 
     const closesSomething = /\b(close|dismiss|collapse|minimi[sz]e)\b/i.test(label);
+    const opensSomething = /\b(open|expand|maximi[sz]e)\b/i.test(label);
     const namesPlayerPage = /\b(player|page|full[\s-]*screen|now playing)\b/i.test(label);
 
-    return closesSomething && (Boolean(playerPage) || namesPlayerPage);
+    return {
+      closes: closesSomething && (Boolean(playerPage) || namesPlayerPage),
+      opens: opensSomething && namesPlayerPage
+    };
   }
 
   function isPlacementNode(target) {
