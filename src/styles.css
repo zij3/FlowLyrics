@@ -194,21 +194,26 @@ html.ytml-player-backdrop-active ytmusic-player-bar {
   padding: 4px;
   pointer-events: none;
   position: absolute;
-  right: 16px;
-  top: 14px;
-  transform: translateY(-4px);
+  left: 50%;
+  top: 18px;
+  transform: translate(-50%, -4px);
   transition: opacity 160ms ease, transform 160ms ease;
   z-index: 2;
 }
 
 #ytml-root.ytml-has-offset-controls .ytml-offset {
-  opacity: 0.72;
-  pointer-events: auto;
-  transform: translateY(0);
+  transform: translate(-50%, -4px);
 }
 
-#ytml-root.ytml-has-offset-controls .ytml-offset:hover,
-#ytml-root.ytml-has-offset-controls .ytml-offset:focus-within {
+#ytml-root.ytml-has-offset-controls .ytml-panel:hover .ytml-offset,
+#ytml-root.ytml-has-offset-controls .ytml-panel:focus-within .ytml-offset {
+  opacity: 0.72;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+#ytml-root.ytml-has-offset-controls .ytml-panel:hover .ytml-offset:hover,
+#ytml-root.ytml-has-offset-controls .ytml-panel:focus-within .ytml-offset {
   opacity: 1;
 }
 
