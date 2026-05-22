@@ -436,12 +436,10 @@
       }
 
       const firstVisible = visibleLines[0];
-      const secondVisible = visibleLines[1];
       const lastVisible = visibleLines[visibleLines.length - 1];
       const edgeLines = [
         [lineEntries[firstVisible.position - 1], "top"],
         [firstVisible, "top"],
-        [secondVisible, "top"],
         [lastVisible, "bottom"],
         [lineEntries[lastVisible.position + 1], "bottom"]
       ];
