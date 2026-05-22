@@ -7,6 +7,7 @@
   const PLAYER_TRANSITION_HOLD_MS = 300;
   const STALE_HANDOFF_TIME_SECONDS = 20;
   const SCAN_INTERVAL_MS = 1300;
+  const VISUAL_HIGHLIGHT_OFFSET_SECONDS = -1;
   const {
     LyricsOverlay,
     lyricsService,
@@ -329,7 +330,8 @@
   }
 
   function readOffsetSyncTime(video) {
-    return Math.max(0, readSyncTime(video) - state.offsetSeconds);
+    const visualOffsetSeconds = state.offsetSeconds + VISUAL_HIGHLIGHT_OFFSET_SECONDS;
+    return Math.max(0, readSyncTime(video) - visualOffsetSeconds);
   }
 
   function readSyncTime(video) {
