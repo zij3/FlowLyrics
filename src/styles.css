@@ -291,34 +291,46 @@ html.ytml-player-backdrop-active ytmusic-player-bar {
 }
 
 .ytml-line {
-  color: var(--ytml-muted);
+  --ytml-line-color: var(--ytml-muted);
+  --ytml-line-filter: none;
+  --ytml-line-opacity: 0.46;
+  --ytml-line-shadow: 0 2px 18px rgba(0, 0, 0, 0.42);
+  color: var(--ytml-line-color);
   cursor: pointer;
+  filter: var(--ytml-line-filter);
   font-size: clamp(20px, 2.45vh, 29px);
   font-weight: 750;
   line-height: 1.2;
   margin: 16px 0;
   max-width: 100%;
   min-height: 1.2em;
-  opacity: 0.46;
+  opacity: var(--ytml-line-opacity);
   overflow-wrap: anywhere;
   outline: none;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.42);
-  transition: color 190ms ease, filter 190ms ease, font-weight 190ms ease, opacity 190ms ease;
+  text-shadow: var(--ytml-line-shadow);
+  transition:
+    color 340ms ease,
+    filter 340ms ease,
+    font-weight 300ms ease,
+    opacity 340ms ease,
+    text-shadow 340ms ease;
 }
 
 .ytml-line span {
   background: none;
   color: inherit;
+  text-shadow: inherit;
+  transition: color 340ms ease, text-shadow 340ms ease;
 }
 
 .ytml-line.is-past {
-  filter: blur(0.2px);
-  opacity: 0.26;
+  --ytml-line-filter: blur(0.2px);
+  --ytml-line-opacity: 0.26;
 }
 
 .ytml-line.is-future {
-  filter: blur(0.1px);
-  opacity: 0.42;
+  --ytml-line-filter: blur(0.1px);
+  --ytml-line-opacity: 0.42;
 }
 
 .ytml-line:hover,
@@ -335,14 +347,43 @@ html.ytml-player-backdrop-active ytmusic-player-bar {
 }
 
 .ytml-line.is-active {
-  filter: none;
+  --ytml-line-color: #fff;
+  --ytml-line-filter: none;
+  --ytml-line-opacity: 1;
+  --ytml-line-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
   font-weight: 850;
-  opacity: 1;
 }
 
-.ytml-line.is-active span {
-  color: #fff;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
+.ytml-line.is-entering-active {
+  animation: ytml-active-line-fade-in 340ms ease both;
+}
+
+.ytml-line.is-leaving-active {
+  animation: ytml-active-line-fade-out 340ms ease both;
+}
+
+@keyframes ytml-active-line-fade-in {
+  from {
+    color: var(--ytml-soft);
+    filter: blur(0.12px);
+    opacity: 0.68;
+  }
+}
+
+@keyframes ytml-active-line-fade-out {
+  from {
+    color: #fff;
+    filter: none;
+    opacity: 1;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
+  }
+
+  to {
+    color: var(--ytml-line-color);
+    filter: var(--ytml-line-filter);
+    opacity: var(--ytml-line-opacity);
+    text-shadow: var(--ytml-line-shadow);
+  }
 }
 
 @media (max-width: 900px) {
@@ -357,6 +398,7 @@ html.ytml-player-backdrop-active ytmusic-player-bar {
   .ytml-line,
   #ytml-root.ytml-player-closing,
   html.ytml-player-backdrop-active ytmusic-player-page #song-image {
+    animation: none;
     transition: none;
   }
 

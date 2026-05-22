@@ -4,9 +4,13 @@
   const PLAYER_BACKDROP_ENTER_MS = 150;
   const PLAYER_BACKDROP_EXIT_MS = 150;
   const PLAYER_BACKDROP_OPEN_DELAY_MS = 150;
+  const LYRIC_BALANCE_LOOKAROUND = 3;
+  const LYRIC_BALANCE_MAX_SHIFT_PX = 84;
+  const LYRIC_BALANCE_WEIGHT = 0.34;
 
   class LyricsOverlay {
     constructor({ formatOffset, onLineSeek, onOffsetChange, onShown } = {}) {
+      this.activeIndex = -1;
       this.autoScrollActive = true;
       this.edgeUpdateQueued = false;
       this.elements = {};
@@ -164,14 +168,24 @@
     }
 
     updateActiveLine(activeIndex, forceScroll) {
+      const previousActiveIndex = this.activeIndex;
+      this.activeIndex = activeIndex;
+
       for (const lineElement of this.elements.lines.querySelectorAll(".ytml-line")) {
         const index = Number(lineElement.dataset.index);
+        lineElement.classList.remove("is-entering-active", "is-leaving-active");
         lineElement.classList.toggle("is-active", index === activeIndex);
         lineElement.classList.toggle("is-past", index < activeIndex);
         lineElement.classList.toggle("is-future", index > activeIndex);
       }
 
       const activeElement = this.elements.lines.querySelector(`.ytml-line[data-index="${activeIndex}"]`);
+      if (previousActiveIndex !== activeIndex) {
+        const previousActiveElement = this.elements.lines.querySelector(`.ytml-line[data-index="${previousActiveIndex}"]`);
+        previousActiveElement?.classList.add("is-leaving-active");
+        activeElement?.classList.add("is-entering-active");
+      }
+
       if (activeElement) {
         this.setAutoScrollActive(true);
         this.scrollLyricListTo(activeElement, forceScroll);
@@ -213,6 +227,13 @@
 
       this.elements.lines.addEventListener("click", (event) => {
         this.handleLineActivation(event.target);
+      });
+
+      this.elements.lines.addEventListener("animationend", (event) => {
+        const lineElement = event.target.closest(".ytml-line");
+        if (lineElement && this.elements.lines.contains(lineElement)) {
+          lineElement.classList.remove("is-entering-active", "is-leaving-active");
+        }
       });
 
       this.elements.lines.addEventListener("scroll", () => {
@@ -449,12 +470,52 @@
     scrollLyricListTo(activeElement, instant) {
       const targetTop = activeElement.offsetTop
         - (this.elements.lines.clientHeight / 2)
-        + (activeElement.offsetHeight / 2);
+        + (activeElement.offsetHeight / 2)
+        + this.calculateLyricBalanceShift(activeElement);
 
       this.elements.lines.scrollTo({
         top: Math.max(0, targetTop),
         behavior: instant ? "auto" : "smooth"
       });
+    }
+
+    calculateLyricBalanceShift(activeElement) {
+      const activeIndex = Number(activeElement?.dataset?.index);
+      if (!Number.isInteger(activeIndex)) {
+        return 0;
+      }
+
+      const above = this.measureNeighborLyricHeight(activeIndex, -1);
+      const below = this.measureNeighborLyricHeight(activeIndex, 1);
+      if (!above.count || !below.count) {
+        return 0;
+      }
+
+      const aboveAverage = above.height / above.count;
+      const belowAverage = below.height / below.count;
+      const comparedRows = Math.min(LYRIC_BALANCE_LOOKAROUND, above.count, below.count);
+      const shift = (aboveAverage - belowAverage) * comparedRows * LYRIC_BALANCE_WEIGHT;
+
+      return Math.max(-LYRIC_BALANCE_MAX_SHIFT_PX, Math.min(LYRIC_BALANCE_MAX_SHIFT_PX, shift));
+    }
+
+    measureNeighborLyricHeight(activeIndex, direction) {
+      let count = 0;
+      let height = 0;
+
+      for (let step = 1; step <= LYRIC_BALANCE_LOOKAROUND; step += 1) {
+        const index = activeIndex + (step * direction);
+        const lineElement = this.elements.lines.querySelector(`.ytml-line[data-index="${index}"]`);
+        if (!lineElement) {
+          continue;
+        }
+
+        const rect = lineElement.getBoundingClientRect();
+        height += rect.height || lineElement.offsetHeight || 0;
+        count += 1;
+      }
+
+      return { count, height };
     }
   }
 
