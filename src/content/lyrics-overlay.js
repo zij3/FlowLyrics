@@ -2,10 +2,11 @@
   "use strict";
 
   class LyricsOverlay {
-    constructor({ formatOffset, onOffsetChange, onShown } = {}) {
+    constructor({ formatOffset, onLineSeek, onOffsetChange, onShown } = {}) {
       this.elements = {};
       this.formatOffset = formatOffset || ((offsetSeconds) => `${offsetSeconds.toFixed(1)}s`);
       this.lastPlacement = "";
+      this.onLineSeek = onLineSeek;
       this.onOffsetChange = onOffsetChange;
       this.onShown = onShown;
       this.visible = false;
@@ -27,6 +28,9 @@
         row.className = "ytml-line";
         row.dataset.index = String(index);
         row.setAttribute("role", "listitem");
+        row.tabIndex = 0;
+        row.setAttribute("aria-label", `Seek to lyric: ${line.text || "..."}`);
+        row.title = "Seek to this lyric";
 
         const span = document.createElement("span");
         span.textContent = line.text || "...";
@@ -121,6 +125,36 @@
           this.onOffsetChange?.(action);
         }
       });
+
+      this.elements.lines.addEventListener("click", (event) => {
+        this.handleLineActivation(event.target);
+      });
+
+      this.elements.lines.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") {
+          return;
+        }
+
+        const lineElement = event.target.closest(".ytml-line");
+        if (!lineElement || !this.elements.lines.contains(lineElement)) {
+          return;
+        }
+
+        event.preventDefault();
+        this.handleLineActivation(lineElement);
+      });
+    }
+
+    handleLineActivation(target) {
+      const lineElement = target?.closest?.(".ytml-line");
+      if (!lineElement || !this.elements.lines.contains(lineElement)) {
+        return;
+      }
+
+      const index = Number(lineElement.dataset.index);
+      if (Number.isInteger(index)) {
+        this.onLineSeek?.(index);
+      }
     }
 
     setVisible(visible) {

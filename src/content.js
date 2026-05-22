@@ -35,6 +35,7 @@
 
   const overlay = new LyricsOverlay({
     formatOffset: offsetController.formatOffset,
+    onLineSeek: handleLineSeek,
     onOffsetChange: handleOffsetChange,
     onShown: () => syncToCurrentLyric(true)
   });
@@ -234,6 +235,41 @@
 
     overlay.setOffset(state.offsetSeconds);
     syncToCurrentLyric(true);
+  }
+
+  function handleLineSeek(index) {
+    const line = state.lines[index];
+    const video = utils.getVideo();
+    if (!line || !video) {
+      return;
+    }
+
+    const seekTime = clampSeekTime(line.time + state.offsetSeconds, video.duration);
+    if (!seekVideo(video, seekTime)) {
+      return;
+    }
+
+    state.freshTrackGuardUntil = 0;
+    syncToCurrentLyric(true);
+  }
+
+  function seekVideo(video, time) {
+    try {
+      video.currentTime = time;
+      video.dispatchEvent(new Event("timeupdate", { bubbles: true }));
+      return true;
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  function clampSeekTime(time, duration) {
+    const minimum = Math.max(0, time);
+    if (!Number.isFinite(duration) || duration <= 0) {
+      return minimum;
+    }
+
+    return Math.min(duration, minimum);
   }
 
   function clearLyrics() {

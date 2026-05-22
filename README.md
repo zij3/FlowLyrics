@@ -1,7 +1,7 @@
 # FlowLyrics
 
 Download the extension ZIP:
-[FlowLyrics-0.2.0.zip](FlowLyrics-0.2.0.zip)
+[FlowLyrics-0.3.0.zip](FlowLyrics-0.3.0.zip)
 
 ![FlowLyrics for YouTube Music preview](assets/preview.png)
 
@@ -41,6 +41,7 @@ To update:
 - Detects the current YouTube Music track from the player bar and media session.
 - Fetches synced LRC lyrics from LRCLIB when available.
 - Animates the active lyric line against the real `<video>` playback time.
+- Jumps playback to a synced line when you click it.
 - Saves a timing offset for synced lyrics with small and large adjustment steps.
 - Leaves YouTube Music's static lyrics alone when synced lyrics are not available.
 

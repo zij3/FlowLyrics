@@ -146,6 +146,7 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
 
 .ytml-line {
   color: var(--ytml-muted);
+  cursor: pointer;
   font-size: clamp(20px, 2.45vh, 29px);
   font-weight: 750;
   line-height: 1.2;
@@ -154,6 +155,7 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
   min-height: 1.2em;
   opacity: 0.46;
   overflow-wrap: anywhere;
+  outline: none;
   transition: color 190ms ease, font-weight 190ms ease, opacity 190ms ease;
 }
 
@@ -168,6 +170,12 @@ html.ytml-replacing-lyrics ytmusic-player-page ytmusic-tab-renderer {
 
 .ytml-line.is-future {
   opacity: 0.48;
+}
+
+.ytml-line:hover,
+.ytml-line:focus-visible {
+  color: var(--ytml-soft);
+  opacity: 0.78;
 }
 
 .ytml-line.is-active {
