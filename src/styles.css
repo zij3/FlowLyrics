@@ -205,6 +205,40 @@ html.ytml-fullscreen-mode ytmusic-player-bar yt-icon {
   width: 32px !important;
 }
 
+html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-inline-badge-renderer,
+html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-explicit-badge-renderer,
+html.ytml-fullscreen-mode ytmusic-player-bar .explicit-badge {
+  align-items: center !important;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  height: 18px !important;
+  line-height: 1 !important;
+  margin: 0 6px 0 0 !important;
+  max-height: 18px !important;
+  position: static !important;
+  transform: none !important;
+  vertical-align: middle !important;
+  width: auto !important;
+}
+
+html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-inline-badge-renderer yt-icon,
+html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-explicit-badge-renderer yt-icon,
+html.ytml-fullscreen-mode ytmusic-player-bar .explicit-badge yt-icon,
+html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-inline-badge-renderer img,
+html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-explicit-badge-renderer img,
+html.ytml-fullscreen-mode ytmusic-player-bar .explicit-badge img,
+html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-inline-badge-renderer svg,
+html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-explicit-badge-renderer svg,
+html.ytml-fullscreen-mode ytmusic-player-bar .explicit-badge svg {
+  height: 18px !important;
+  margin: 0 !important;
+  max-height: 18px !important;
+  max-width: 18px !important;
+  position: static !important;
+  transform: none !important;
+  width: 18px !important;
+}
+
 html.ytml-fullscreen-mode ytmusic-player-bar #play-pause-button,
 html.ytml-fullscreen-mode ytmusic-player-bar .play-pause-button,
 html.ytml-fullscreen-mode ytmusic-player-bar [aria-label="Play"],

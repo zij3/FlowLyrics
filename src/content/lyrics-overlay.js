@@ -530,7 +530,7 @@
 
     calculateFullscreenLyricTarget(activeElement) {
       const activeRect = activeElement.getBoundingClientRect();
-      const previousRows = this.getPreviousLyricRows(activeElement, 2);
+      const previousRows = this.getPreviousLyricRows(activeElement, 3);
       const previousSpace = previousRows.length
         ? previousRows.reduce((total, row) => total + row.height, 0)
           + (previousRows.length * Math.max(18, activeRect.height * 0.22))
