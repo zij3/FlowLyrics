@@ -29,6 +29,7 @@
     nativePaneHoldUntil: 0,
     offsetSeconds: offsetController.loadOffset(),
     placementQueued: false,
+    fullscreenWanted: false,
     playerCloseTimerId: 0,
     playerTransitionHoldUntil: 0,
     playerTransitionTimerId: 0,
@@ -40,6 +41,7 @@
 
   const overlay = new LyricsOverlay({
     formatOffset: offsetController.formatOffset,
+    onFullscreenToggle: handleFullscreenToggle,
     onLineSeek: handleLineSeek,
     onOffsetChange: handleOffsetChange,
     onShown: () => syncToCurrentLyric(true)
@@ -59,6 +61,8 @@
       onPlaybackReady: scheduleScan,
       onTrackBoundary: handleTrackBoundary
     });
+    document.addEventListener("fullscreenchange", handleFullscreenChange, true);
+    document.addEventListener("fullscreenerror", handleFullscreenError, true);
 
     scanTrack(true);
     setInterval(() => scanTrack(false), SCAN_INTERVAL_MS);
@@ -298,6 +302,58 @@
     syncToCurrentLyric(true);
   }
 
+  async function handleFullscreenToggle() {
+    if (isFullscreenActive()) {
+      exitFullscreenMode();
+      return;
+    }
+
+    const fullscreenTarget = document.documentElement;
+    if (!fullscreenTarget?.requestFullscreen) {
+      return;
+    }
+
+    state.fullscreenWanted = true;
+    try {
+      await fullscreenTarget.requestFullscreen({ navigationUI: "hide" });
+    } catch (_error) {
+      state.fullscreenWanted = false;
+      overlay.setFullscreenActive(false);
+    }
+
+    schedulePlacementUpdate();
+  }
+
+  function exitFullscreenMode() {
+    state.fullscreenWanted = false;
+    overlay.setFullscreenActive(false);
+
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+
+    schedulePlacementUpdate();
+  }
+
+  function handleFullscreenChange() {
+    if (!document.fullscreenElement) {
+      state.fullscreenWanted = false;
+    }
+
+    overlay.setFullscreenActive(isFullscreenActive());
+    schedulePlacementUpdate();
+  }
+
+  function handleFullscreenError() {
+    state.fullscreenWanted = false;
+    overlay.setFullscreenActive(false);
+    schedulePlacementUpdate();
+  }
+
+  function isFullscreenActive() {
+    return Boolean(state.fullscreenWanted && document.fullscreenElement);
+  }
+
   function handleLineSeek(index) {
     const line = state.lines[index];
     const video = utils.getVideo();
@@ -415,11 +471,16 @@
       && hostRect
       && replacingLyricsPane
     );
+    if (!visible && state.fullscreenWanted) {
+      exitFullscreenMode();
+    }
+
     const suppressNativePane = Boolean(visible || (transitionHeld && replacingLyricsPane));
 
     overlay.setLoading(state.loading);
     overlay.setOffsetControlsVisible(state.hasSyncedLyrics && state.lines.length);
     overlay.updatePlacement({
+      fullscreenActive: isFullscreenActive(),
       hostRect,
       playerOpen: playerOpen && !transitionHeld,
       visible

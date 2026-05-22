@@ -9,14 +9,16 @@
   const LYRIC_BALANCE_WEIGHT = 0.34;
 
   class LyricsOverlay {
-    constructor({ formatOffset, onLineSeek, onOffsetChange, onShown } = {}) {
+    constructor({ formatOffset, onFullscreenToggle, onLineSeek, onOffsetChange, onShown } = {}) {
       this.activeIndex = -1;
       this.autoScrollActive = true;
       this.edgeUpdateQueued = false;
       this.elements = {};
       this.formatOffset = formatOffset || ((offsetSeconds) => `${offsetSeconds.toFixed(1)}s`);
+      this.fullscreenActive = false;
       this.lastArtworkUrl = "";
       this.lastPlacement = "";
+      this.onFullscreenToggle = onFullscreenToggle;
       this.onLineSeek = onLineSeek;
       this.onOffsetChange = onOffsetChange;
       this.onShown = onShown;
@@ -89,7 +91,9 @@
       this.updatePlayerBackdropVisibility();
     }
 
-    updatePlacement({ hostRect, playerOpen, visible }) {
+    updatePlacement({ fullscreenActive, hostRect, playerOpen, visible }) {
+      this.setFullscreenActive(Boolean(visible && fullscreenActive));
+
       if (visible) {
         this.applyPlacement(hostRect);
       } else if (this.lastPlacement) {
@@ -204,6 +208,8 @@
             <button class="ytml-offset-value" type="button" data-offset-action="reset" aria-label="Reset lyric offset" title="Reset lyric offset">0.0s</button>
             <button class="ytml-offset-button" type="button" data-offset-action="increase" aria-label="Show lyrics 0.1 seconds later" title="Show lyrics 0.1 seconds later">+</button>
             <button class="ytml-offset-button ytml-offset-jump" type="button" data-offset-action="increase-large" aria-label="Show lyrics 1 second later" title="Show lyrics 1 second later">+1s</button>
+            <span class="ytml-offset-separator" aria-hidden="true"></span>
+            <button class="ytml-offset-button ytml-fullscreen-button" type="button" data-fullscreen-action="toggle" aria-label="Enter fullscreen lyrics" aria-pressed="false" title="Enter fullscreen lyrics"></button>
           </div>
           <main class="ytml-body">
             <div class="ytml-lines" role="list"></div>
@@ -215,10 +221,17 @@
 
       this.elements.root = root;
       this.elements.lines = root.querySelector(".ytml-lines");
+      this.elements.fullscreenButton = root.querySelector(".ytml-fullscreen-button");
       this.elements.offsetValue = root.querySelector(".ytml-offset-value");
       this.setAutoScrollActive(true);
 
       root.querySelector(".ytml-offset").addEventListener("click", (event) => {
+        const fullscreenAction = event.target.closest("[data-fullscreen-action]")?.dataset.fullscreenAction;
+        if (fullscreenAction) {
+          this.onFullscreenToggle?.();
+          return;
+        }
+
         const action = event.target.closest("[data-offset-action]")?.dataset.offsetAction;
         if (action) {
           this.onOffsetChange?.(action);
@@ -380,12 +393,32 @@
       this.queueEdgeLineUpdate();
     }
 
+    setFullscreenActive(active) {
+      const fullscreenActive = Boolean(active);
+      if (fullscreenActive === this.fullscreenActive) {
+        return;
+      }
+
+      this.fullscreenActive = fullscreenActive;
+      this.lastPlacement = "";
+      this.elements.root.classList.toggle("ytml-fullscreen-active", this.fullscreenActive);
+      document.documentElement.classList.toggle("ytml-fullscreen-mode", this.fullscreenActive);
+
+      if (this.elements.fullscreenButton) {
+        const label = this.fullscreenActive ? "Exit fullscreen lyrics" : "Enter fullscreen lyrics";
+        this.elements.fullscreenButton.setAttribute("aria-label", label);
+        this.elements.fullscreenButton.setAttribute("aria-pressed", String(this.fullscreenActive));
+        this.elements.fullscreenButton.title = label;
+      }
+    }
+
     applyPlacement(hostRect) {
+      const rect = this.fullscreenActive ? this.getFullscreenPlacement() : hostRect;
       const placement = [
-        Math.round(hostRect.left),
-        Math.round(hostRect.top),
-        Math.round(hostRect.width),
-        Math.round(hostRect.height)
+        Math.round(rect.left),
+        Math.round(rect.top),
+        Math.round(rect.width),
+        Math.round(rect.height)
       ].join(":");
 
       if (placement === this.lastPlacement) {
@@ -393,10 +426,25 @@
       }
 
       this.lastPlacement = placement;
-      this.elements.root.style.setProperty("--ytml-left", `${hostRect.left}px`);
-      this.elements.root.style.setProperty("--ytml-top", `${hostRect.top}px`);
-      this.elements.root.style.setProperty("--ytml-width", `${hostRect.width}px`);
-      this.elements.root.style.setProperty("--ytml-height", `${hostRect.height}px`);
+      this.elements.root.style.setProperty("--ytml-left", `${rect.left}px`);
+      this.elements.root.style.setProperty("--ytml-top", `${rect.top}px`);
+      this.elements.root.style.setProperty("--ytml-width", `${rect.width}px`);
+      this.elements.root.style.setProperty("--ytml-height", `${rect.height}px`);
+    }
+
+    getFullscreenPlacement() {
+      const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+      const lyricPaneLeft = viewportWidth >= 980
+        ? Math.min(Math.round(viewportWidth * 0.48), viewportWidth - 360)
+        : 0;
+
+      return {
+        left: Math.max(0, lyricPaneLeft),
+        top: 0,
+        width: Math.max(320, viewportWidth - lyricPaneLeft),
+        height: Math.max(320, viewportHeight)
+      };
     }
 
     queueEdgeLineUpdate() {
