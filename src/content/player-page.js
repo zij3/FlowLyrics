@@ -2,6 +2,8 @@
   "use strict";
 
   const { textFrom } = globalThis.YTML.utils;
+  let nativeCloseReplayControl = null;
+  let nativeCloseReplayUntil = 0;
 
   function observePlayerPage({
     onCloseRequested,
@@ -11,14 +13,36 @@
   }) {
     const requestPlacement = () => onPlacementRequested?.();
     const requestScan = () => onScanRequested?.();
-    const requestClose = () => onCloseRequested?.();
+    const requestClose = (detail) => onCloseRequested?.(detail);
     const requestPlayerTransition = () => onPlayerTransitionRequested?.();
 
     const handlePlayerAction = (event) => {
-      if (isPlayerPageToggleAction(event.target)) {
+      const action = readPlayerAction(event.target);
+      if (!action) {
+        requestPlacement();
+        return;
+      }
+
+      if (action.closes) {
+        if (isNativeCloseReplay(action.control)) {
+          requestPlayerTransition();
+          requestPlacement();
+          return;
+        }
+
+        const handled = requestClose({
+          control: action.control,
+          eventType: event.type
+        });
+
+        if (handled) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          requestPlacement();
+          return;
+        }
+      } else if (action.opens) {
         requestPlayerTransition();
-      } else if (isPlayerCloseAction(event.target)) {
-        requestClose();
       }
 
       requestPlacement();
@@ -60,6 +84,39 @@
       childList: true,
       subtree: true
     });
+  }
+
+  function runNativeCloseAction(control) {
+    const closeControl = findConnectedCloseControl(control);
+    if (!closeControl || typeof closeControl.click !== "function") {
+      return false;
+    }
+
+    nativeCloseReplayControl = closeControl;
+    nativeCloseReplayUntil = performance.now() + 1200;
+    closeControl.click();
+    nativeCloseReplayControl = null;
+    nativeCloseReplayUntil = 0;
+    return true;
+  }
+
+  function findConnectedCloseControl(control) {
+    if (control?.isConnected) {
+      return control;
+    }
+
+    const controls = document.querySelectorAll(
+      "ytmusic-player-page button, ytmusic-player-page tp-yt-paper-icon-button, ytmusic-player-page yt-icon-button, ytmusic-player-page yt-button-renderer, ytmusic-player-page [role='button'], ytmusic-player-page [aria-label], ytmusic-player-page [title]"
+    );
+    return [...controls].find((candidate) => readPlayerAction(candidate)?.closes) || null;
+  }
+
+  function isNativeCloseReplay(control) {
+    return Boolean(
+      nativeCloseReplayControl
+      && control === nativeCloseReplayControl
+      && performance.now() < nativeCloseReplayUntil
+    );
   }
 
   function isPlayerPageOpen(playerPage) {
@@ -150,6 +207,7 @@
     const namesPlayerPage = /\b(player|page|full[\s-]*screen|now playing)\b/i.test(label);
 
     return {
+      control,
       closes: closesSomething && (Boolean(playerPage) || namesPlayerPage),
       opens: opensSomething && namesPlayerPage
     };
@@ -170,6 +228,7 @@
     getLyricsHostRect,
     isLyricsTabSelected,
     isPlayerPageOpen,
-    observePlayerPage
+    observePlayerPage,
+    runNativeCloseAction
   };
 })();

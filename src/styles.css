@@ -43,7 +43,9 @@ html.ytml-player-backdrop-active body {
 }
 
 html.ytml-player-backdrop-active body::before,
-html.ytml-player-backdrop-active body::after {
+html.ytml-player-backdrop-active body::after,
+html.ytml-player-backdrop-exiting body::before,
+html.ytml-player-backdrop-exiting body::after {
   content: "";
   inset: 0;
   pointer-events: none;
@@ -52,7 +54,8 @@ html.ytml-player-backdrop-active body::after {
   z-index: 0;
 }
 
-html.ytml-player-backdrop-active body::before {
+html.ytml-player-backdrop-active body::before,
+html.ytml-player-backdrop-exiting body::before {
   background-image: var(--ytml-artwork-url);
   background-position: center;
   background-size: cover;
@@ -61,12 +64,19 @@ html.ytml-player-backdrop-active body::before {
   transform: scale(1.18);
 }
 
-html.ytml-player-backdrop-active body::after {
+html.ytml-player-backdrop-active body::after,
+html.ytml-player-backdrop-exiting body::after {
   background:
     radial-gradient(circle at 18% 52%, rgba(255, 255, 255, 0.12), transparent 24%),
     radial-gradient(circle at 62% 34%, rgba(255, 255, 255, 0.08), transparent 30%),
     linear-gradient(90deg, rgba(0, 0, 0, 0.74) 0%, rgba(0, 0, 0, 0.14) 50%, rgba(0, 0, 0, 0.54) 100%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.54) 0%, rgba(0, 0, 0, 0.06) 42%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+html.ytml-player-backdrop-exiting body::before,
+html.ytml-player-backdrop-exiting body::after {
+  animation: ytml-backdrop-fade-out 560ms ease both;
+  z-index: 2147483600;
 }
 
 html.ytml-player-backdrop-active.ytml-player-backdrop-entering body::before,
@@ -76,6 +86,12 @@ html.ytml-player-backdrop-active.ytml-player-backdrop-entering body::after {
 
 @keyframes ytml-backdrop-fade-in {
   from {
+    opacity: 0;
+  }
+}
+
+@keyframes ytml-backdrop-fade-out {
+  to {
     opacity: 0;
   }
 }
@@ -144,6 +160,10 @@ html.ytml-player-backdrop-active ytmusic-player-bar {
 
 #ytml-root.ytml-fast-hide {
   transition: none;
+}
+
+#ytml-root.ytml-player-closing {
+  transition: opacity 560ms ease, transform 560ms ease, visibility 560ms ease;
 }
 
 .ytml-panel {
@@ -253,13 +273,16 @@ html.ytml-player-backdrop-active ytmusic-player-bar {
 }
 
 .ytml-lines {
+  --ytml-edge-padding: 34%;
+  --ytml-start-padding: max(96px, calc(var(--ytml-edge-padding) - 104px));
   contain: layout paint;
   height: 100%;
   overscroll-behavior: contain;
   overflow: auto;
-  padding: 34% 22px;
+  padding: var(--ytml-start-padding) 22px var(--ytml-edge-padding);
   scroll-behavior: smooth;
-  scroll-padding-block: 34%;
+  scroll-padding-block-start: var(--ytml-start-padding);
+  scroll-padding-block-end: var(--ytml-edge-padding);
   scrollbar-width: none;
 }
 
@@ -332,8 +355,16 @@ html.ytml-player-backdrop-active ytmusic-player-bar {
   .ytml-panel,
   .ytml-offset,
   .ytml-line,
+  #ytml-root.ytml-player-closing,
   html.ytml-player-backdrop-active ytmusic-player-page #song-image {
     transition: none;
+  }
+
+  html.ytml-player-backdrop-active body::before,
+  html.ytml-player-backdrop-active body::after,
+  html.ytml-player-backdrop-exiting body::before,
+  html.ytml-player-backdrop-exiting body::after {
+    animation: none;
   }
 
   .ytml-lines {

@@ -29,6 +29,7 @@
     nativePaneHoldUntil: 0,
     offsetSeconds: offsetController.loadOffset(),
     placementQueued: false,
+    playerCloseTimerId: 0,
     playerTransitionHoldUntil: 0,
     playerTransitionTimerId: 0,
     rafId: 0,
@@ -49,7 +50,7 @@
 
   function init() {
     playerPage.observePlayerPage({
-      onCloseRequested: handlePlayerTransition,
+      onCloseRequested: handlePlayerCloseRequested,
       onPlacementRequested: schedulePlacementUpdate,
       onPlayerTransitionRequested: handlePlayerTransition,
       onScanRequested: scheduleScan
@@ -210,10 +211,10 @@
     return performance.now() < state.nativePaneHoldUntil;
   }
 
-  function holdPlayerTransition() {
+  function holdPlayerTransition(duration = PLAYER_TRANSITION_HOLD_MS) {
     state.playerTransitionHoldUntil = Math.max(
       state.playerTransitionHoldUntil,
-      performance.now() + PLAYER_TRANSITION_HOLD_MS
+      performance.now() + duration
     );
   }
 
@@ -235,6 +236,32 @@
       scheduleScan();
       schedulePlacementUpdate();
     }, PLAYER_TRANSITION_HOLD_MS);
+  }
+
+  function handlePlayerCloseRequested({ control } = {}) {
+    if (state.playerCloseTimerId) {
+      return true;
+    }
+
+    const closeDelay = overlay.startPlayerCloseFade();
+    if (!closeDelay || !control) {
+      handlePlayerTransition();
+      return false;
+    }
+
+    holdPlayerTransition(closeDelay + PLAYER_TRANSITION_HOLD_MS);
+    updateNativePaneVisibility(true);
+
+    state.playerCloseTimerId = setTimeout(() => {
+      state.playerCloseTimerId = 0;
+      if (!playerPage.runNativeCloseAction(control)) {
+        handlePlayerTransition();
+      }
+      scheduleScan();
+      schedulePlacementUpdate();
+    }, closeDelay);
+
+    return true;
   }
 
   function isReplacingLyricsPane() {

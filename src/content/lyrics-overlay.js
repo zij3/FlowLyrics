@@ -2,6 +2,7 @@
   "use strict";
 
   const PLAYER_BACKDROP_ENTER_MS = 560;
+  const PLAYER_BACKDROP_EXIT_MS = 150;
   const PLAYER_BACKDROP_OPEN_DELAY_MS = 250;
 
   class LyricsOverlay {
@@ -16,7 +17,9 @@
       this.onOffsetChange = onOffsetChange;
       this.onShown = onShown;
       this.playerBackdropEnterTimerId = 0;
+      this.playerBackdropExitTimerId = 0;
       this.playerBackdropOpenTimerId = 0;
+      this.playerCloseFading = false;
       this.visible = false;
 
       this.createInterface();
@@ -112,6 +115,52 @@
           this.elements.root.classList.remove("ytml-fast-hide");
         });
       });
+    }
+
+    startPlayerCloseFade() {
+      const html = document.documentElement;
+      const backdropActive = html.classList.contains("ytml-player-backdrop-active")
+        || html.classList.contains("ytml-player-backdrop-entering");
+      const shouldDelayClose = backdropActive || this.visible;
+
+      if (!shouldDelayClose) {
+        this.deactivatePlayerBackdrop();
+        return 0;
+      }
+
+      this.playerCloseFading = true;
+      this.elements.root.classList.remove("ytml-player-open");
+      this.elements.root.classList.add("ytml-player-closing");
+      this.lastPlacement = "";
+      this.setVisible(false);
+
+      if (this.playerBackdropOpenTimerId) {
+        clearTimeout(this.playerBackdropOpenTimerId);
+        this.playerBackdropOpenTimerId = 0;
+      }
+
+      if (this.playerBackdropEnterTimerId) {
+        clearTimeout(this.playerBackdropEnterTimerId);
+        this.playerBackdropEnterTimerId = 0;
+      }
+
+      if (backdropActive) {
+        html.classList.remove("ytml-player-backdrop-active", "ytml-player-backdrop-entering");
+        html.classList.add("ytml-player-backdrop-exiting");
+      }
+
+      if (this.playerBackdropExitTimerId) {
+        clearTimeout(this.playerBackdropExitTimerId);
+      }
+
+      this.playerBackdropExitTimerId = setTimeout(() => {
+        this.playerBackdropExitTimerId = 0;
+        this.playerCloseFading = false;
+        this.elements.root.classList.remove("ytml-player-closing");
+        html.classList.remove("ytml-player-backdrop-exiting");
+      }, PLAYER_BACKDROP_EXIT_MS + 80);
+
+      return PLAYER_BACKDROP_EXIT_MS;
     }
 
     updateActiveLine(activeIndex, forceScroll) {
@@ -226,6 +275,10 @@
     }
 
     updatePlayerBackdropVisibility(playerOpen = this.elements.root.classList.contains("ytml-player-open")) {
+      if (this.playerCloseFading) {
+        return;
+      }
+
       const shouldShowBackdrop = Boolean(playerOpen && this.lastArtworkUrl);
       if (!shouldShowBackdrop) {
         this.deactivatePlayerBackdrop();
@@ -253,6 +306,14 @@
         clearTimeout(this.playerBackdropEnterTimerId);
       }
 
+      if (this.playerBackdropExitTimerId) {
+        clearTimeout(this.playerBackdropExitTimerId);
+        this.playerBackdropExitTimerId = 0;
+      }
+
+      this.playerCloseFading = false;
+      this.elements.root.classList.remove("ytml-player-closing");
+      html.classList.remove("ytml-player-backdrop-exiting");
       html.classList.add("ytml-player-backdrop-active", "ytml-player-backdrop-entering");
       this.playerBackdropEnterTimerId = setTimeout(() => {
         this.playerBackdropEnterTimerId = 0;
@@ -271,9 +332,17 @@
         this.playerBackdropEnterTimerId = 0;
       }
 
+      if (this.playerBackdropExitTimerId) {
+        clearTimeout(this.playerBackdropExitTimerId);
+        this.playerBackdropExitTimerId = 0;
+      }
+
+      this.playerCloseFading = false;
+      this.elements.root.classList.remove("ytml-player-closing");
       document.documentElement.classList.remove(
         "ytml-player-backdrop-active",
-        "ytml-player-backdrop-entering"
+        "ytml-player-backdrop-entering",
+        "ytml-player-backdrop-exiting"
       );
     }
 
