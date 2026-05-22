@@ -33,18 +33,6 @@ This extension is distributed from GitHub instead of the Chrome Web Store, so it
 
 Open the full player and click YouTube Music's Lyrics tab. When synced lyrics are available, the extension replaces the static lyrics pane with animated synced lyrics. If synced lyrics are not available, YouTube Music's own static lyrics stay visible.
 
-## Updating
-
-Chrome will not update this extension automatically because it is not installed from the Chrome Web Store.
-
-To update:
-
-1. Download the latest ZIP from this repository.
-2. Extract it over the old folder, or extract it to a new folder.
-3. Go to `chrome://extensions`.
-4. Click the reload button on the FlowLyrics for YouTube Music extension.
-5. Refresh YouTube Music.
-
 ## What It Does
 
 - Detects the current YouTube Music track from the player bar and media session.
