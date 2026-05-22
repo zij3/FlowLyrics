@@ -4,6 +4,7 @@
   const PLAYER_BACKDROP_ENTER_MS = 150;
   const PLAYER_BACKDROP_EXIT_MS = 150;
   const PLAYER_BACKDROP_OPEN_DELAY_MS = 150;
+  const FULLSCREEN_BOTTOM_SAFE_PX = 152;
   const LYRIC_BALANCE_LOOKAROUND = 3;
   const LYRIC_BALANCE_MAX_SHIFT_PX = 84;
   const LYRIC_BALANCE_WEIGHT = 0.34;
@@ -435,15 +436,12 @@
     getFullscreenPlacement() {
       const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
       const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-      const lyricPaneLeft = viewportWidth >= 980
-        ? Math.min(Math.round(viewportWidth * 0.48), viewportWidth - 360)
-        : 0;
 
       return {
-        left: Math.max(0, lyricPaneLeft),
+        left: 0,
         top: 0,
-        width: Math.max(320, viewportWidth - lyricPaneLeft),
-        height: Math.max(320, viewportHeight)
+        width: Math.max(320, viewportWidth),
+        height: Math.max(320, viewportHeight - FULLSCREEN_BOTTOM_SAFE_PX)
       };
     }
 

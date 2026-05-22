@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "FlowLyrics for YouTube Music",
   "description": "Adds animated synced lyrics to YouTube Music.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "host_permissions": [
     "https://music.youtube.com/*",
     "https://lrclib.net/*"

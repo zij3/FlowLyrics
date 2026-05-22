@@ -1,7 +1,7 @@
 # FlowLyrics
 
 Download the extension ZIP:
-[FlowLyrics-0.5.1.zip](FlowLyrics-0.5.1.zip)
+[FlowLyrics-0.5.2.zip](FlowLyrics-0.5.2.zip)
 
 FlowLyrics replaces YouTube Music's static Lyrics tab with animated synced lyrics when LRCLIB has timing data. If synced lyrics are not available, YouTube Music's own lyrics stay visible.
 

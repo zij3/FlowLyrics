@@ -147,9 +147,8 @@ html.ytml-player-backdrop-active ytmusic-player-page #song-image {
 }
 
 html.ytml-fullscreen-mode {
-  --ytml-fullscreen-art-left: clamp(48px, 11vw, 180px);
-  --ytml-fullscreen-art-size: min(32vw, 54vh, 560px);
-  --ytml-fullscreen-art-top: clamp(84px, 16vh, 180px);
+  --ytml-fullscreen-bottom-bar-height: 132px;
+  --ytml-fullscreen-side-padding: clamp(46px, 7vw, 132px);
 }
 
 html.ytml-fullscreen-mode ytmusic-player-page tp-yt-paper-tabs,
@@ -162,46 +161,50 @@ html.ytml-fullscreen-mode ytmusic-player-page #tabs {
   visibility: hidden !important;
 }
 
+html.ytml-player-backdrop-active.ytml-fullscreen-mode ytmusic-player-page #song-image,
+html.ytml-player-backdrop-active.ytml-fullscreen-mode ytmusic-player-page #song-image *,
 html.ytml-player-backdrop-active.ytml-fullscreen-mode ytmusic-player-page *:has(> #song-image) {
-  height: var(--ytml-fullscreen-art-size) !important;
-  left: var(--ytml-fullscreen-art-left) !important;
-  max-height: var(--ytml-fullscreen-art-size) !important;
-  max-width: var(--ytml-fullscreen-art-size) !important;
-  min-height: 0 !important;
-  min-width: 0 !important;
-  overflow: visible !important;
-  position: fixed !important;
-  top: var(--ytml-fullscreen-art-top) !important;
-  transform: none !important;
-  width: var(--ytml-fullscreen-art-size) !important;
-  z-index: 2 !important;
-}
-
-html.ytml-player-backdrop-active.ytml-fullscreen-mode ytmusic-player-page #song-image {
-  height: var(--ytml-fullscreen-art-size) !important;
-  max-height: var(--ytml-fullscreen-art-size) !important;
-  max-width: var(--ytml-fullscreen-art-size) !important;
-  min-height: 0 !important;
-  min-width: 0 !important;
-  transform: none !important;
-  width: var(--ytml-fullscreen-art-size) !important;
-}
-
-html.ytml-player-backdrop-active.ytml-fullscreen-mode ytmusic-player-page #song-image img,
-html.ytml-player-backdrop-active.ytml-fullscreen-mode ytmusic-player-page #song-image yt-img-shadow,
-html.ytml-player-backdrop-active.ytml-fullscreen-mode ytmusic-player-page #song-image #thumbnail {
-  border-radius: 8px !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  max-width: 100% !important;
-  object-fit: cover !important;
-  width: 100% !important;
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
 }
 
 html.ytml-player-backdrop-active ytmusic-nav-bar,
 html.ytml-player-backdrop-active ytmusic-guide-renderer,
 html.ytml-player-backdrop-active ytmusic-player-bar {
   backdrop-filter: none !important;
+}
+
+html.ytml-fullscreen-mode ytmusic-player-bar {
+  min-height: var(--ytml-fullscreen-bottom-bar-height) !important;
+}
+
+html.ytml-fullscreen-mode ytmusic-player-bar img {
+  border-radius: 4px !important;
+  height: 54px !important;
+  object-fit: cover !important;
+  width: 54px !important;
+}
+
+html.ytml-fullscreen-mode ytmusic-player-bar button,
+html.ytml-fullscreen-mode ytmusic-player-bar tp-yt-paper-icon-button,
+html.ytml-fullscreen-mode ytmusic-player-bar yt-icon-button,
+html.ytml-fullscreen-mode ytmusic-player-bar [role="button"] {
+  transform: scale(1.12);
+  transform-origin: center;
+}
+
+html.ytml-fullscreen-mode ytmusic-player-bar .title,
+html.ytml-fullscreen-mode ytmusic-player-bar yt-formatted-string.title {
+  font-size: 15px !important;
+  line-height: 1.25 !important;
+}
+
+html.ytml-fullscreen-mode ytmusic-player-bar .byline,
+html.ytml-fullscreen-mode ytmusic-player-bar .subtitle {
+  font-size: 13px !important;
+  line-height: 1.25 !important;
 }
 
 #ytml-root.ytml-visible {
@@ -478,14 +481,14 @@ html.ytml-player-backdrop-active ytmusic-player-bar {
 #ytml-root.ytml-fullscreen-active .ytml-lines {
   --ytml-edge-padding: 40%;
   --ytml-start-padding: max(128px, calc(var(--ytml-edge-padding) - 128px));
-  padding: var(--ytml-start-padding) clamp(32px, 5vw, 96px) var(--ytml-edge-padding);
+  padding: var(--ytml-start-padding) var(--ytml-fullscreen-side-padding) var(--ytml-edge-padding);
 }
 
 #ytml-root.ytml-fullscreen-active .ytml-line {
-  font-size: clamp(36px, 5.8vh, 64px);
+  font-size: clamp(38px, 5.8vh, 66px);
   line-height: 1.08;
   margin: clamp(18px, 2.4vh, 32px) 0;
-  max-width: min(900px, 100%);
+  max-width: min(1420px, 100%);
   text-shadow: 0 5px 34px rgba(0, 0, 0, 0.66);
 }
 
