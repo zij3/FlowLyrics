@@ -1,5 +1,9 @@
+:root {
+  --ytml-artwork-url: none;
+}
+
 #ytml-root {
-  --ytml-bg: #030303;
+  --ytml-artwork-url: none;
   --ytml-text: rgba(255, 255, 255, 0.96);
   --ytml-soft: rgba(255, 255, 255, 0.64);
   --ytml-muted: rgba(255, 255, 255, 0.34);
@@ -33,6 +37,92 @@ html.ytml-suppress-native-lyrics ytmusic-player-page ytmusic-tab-renderer {
   visibility: hidden !important;
 }
 
+html.ytml-player-backdrop-active,
+html.ytml-player-backdrop-active body {
+  background: #050505 !important;
+}
+
+html.ytml-player-backdrop-active body::before,
+html.ytml-player-backdrop-active body::after {
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  will-change: opacity;
+  z-index: 0;
+}
+
+html.ytml-player-backdrop-active body::before {
+  background-image: var(--ytml-artwork-url);
+  background-position: center;
+  background-size: cover;
+  filter: blur(82px) saturate(1.95) brightness(0.72);
+  opacity: 0.96;
+  transform: scale(1.18);
+}
+
+html.ytml-player-backdrop-active body::after {
+  background:
+    radial-gradient(circle at 18% 52%, rgba(255, 255, 255, 0.12), transparent 24%),
+    radial-gradient(circle at 62% 34%, rgba(255, 255, 255, 0.08), transparent 30%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.74) 0%, rgba(0, 0, 0, 0.14) 50%, rgba(0, 0, 0, 0.54) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.54) 0%, rgba(0, 0, 0, 0.06) 42%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+html.ytml-player-backdrop-active.ytml-player-backdrop-entering body::before,
+html.ytml-player-backdrop-active.ytml-player-backdrop-entering body::after {
+  animation: ytml-backdrop-fade-in 480ms ease both;
+}
+
+@keyframes ytml-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+html.ytml-player-backdrop-active ytmusic-app {
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
+}
+
+html.ytml-player-backdrop-active ytmusic-app-layout,
+html.ytml-player-backdrop-active ytmusic-browse-response,
+html.ytml-player-backdrop-active ytmusic-guide-renderer,
+html.ytml-player-backdrop-active ytmusic-guide-entry-renderer,
+html.ytml-player-backdrop-active ytmusic-nav-bar,
+html.ytml-player-backdrop-active ytmusic-player-bar,
+html.ytml-player-backdrop-active ytmusic-player-page,
+html.ytml-player-backdrop-active #layout,
+html.ytml-player-backdrop-active #content,
+html.ytml-player-backdrop-active #guide,
+html.ytml-player-backdrop-active #guide-wrapper,
+html.ytml-player-backdrop-active #mini-guide,
+html.ytml-player-backdrop-active #nav-bar-background,
+html.ytml-player-backdrop-active #player-bar-background {
+  background: transparent !important;
+}
+
+html.ytml-player-backdrop-active ytmusic-guide-renderer *,
+html.ytml-player-backdrop-active ytmusic-guide-entry-renderer *,
+html.ytml-player-backdrop-active [id*="guide"],
+html.ytml-player-backdrop-active [class*="guide"],
+html.ytml-player-backdrop-active [id*="mini-guide"],
+html.ytml-player-backdrop-active [class*="mini-guide"] {
+  background-color: transparent !important;
+}
+
+html.ytml-player-backdrop-active ytmusic-player-page [class*="background"],
+html.ytml-player-backdrop-active ytmusic-player-page [id*="background"] {
+  background: transparent !important;
+}
+
+html.ytml-player-backdrop-active ytmusic-nav-bar,
+html.ytml-player-backdrop-active ytmusic-guide-renderer,
+html.ytml-player-backdrop-active ytmusic-player-bar {
+  backdrop-filter: none !important;
+}
+
 #ytml-root.ytml-visible {
   opacity: 1;
   transform: translateY(0);
@@ -44,7 +134,7 @@ html.ytml-suppress-native-lyrics ytmusic-player-page ytmusic-tab-renderer {
 }
 
 .ytml-panel {
-  background: var(--ytml-bg);
+  background: transparent;
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -60,24 +150,33 @@ html.ytml-suppress-native-lyrics ytmusic-player-page ytmusic-tab-renderer {
 
 .ytml-offset {
   align-items: center;
-  background: rgba(18, 18, 18, 0.84);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 6px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: rgba(12, 12, 12, 0.58);
+  border: 0;
+  border-radius: 999px;
   display: inline-flex;
-  gap: 2px;
+  gap: 1px;
   opacity: 0;
-  padding: 3px;
+  padding: 4px;
   pointer-events: none;
   position: absolute;
-  right: 12px;
-  top: 12px;
-  transition: opacity 160ms ease;
+  right: 16px;
+  top: 14px;
+  transform: translateY(-4px);
+  transition: opacity 160ms ease, transform 160ms ease;
   z-index: 2;
 }
 
 #ytml-root.ytml-has-offset-controls .ytml-offset {
-  opacity: 1;
+  opacity: 0.72;
   pointer-events: auto;
+  transform: translateY(0);
+}
+
+#ytml-root.ytml-has-offset-controls .ytml-offset:hover,
+#ytml-root.ytml-has-offset-controls .ytml-offset:focus-within {
+  opacity: 1;
 }
 
 .ytml-offset-button,
@@ -86,43 +185,53 @@ html.ytml-suppress-native-lyrics ytmusic-player-page ytmusic-tab-renderer {
   appearance: none;
   background: transparent;
   border: 0;
-  border-radius: 4px;
-  color: rgba(255, 255, 255, 0.86);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.78);
   cursor: pointer;
   display: inline-flex;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  height: 28px;
+  height: 30px;
   justify-content: center;
   line-height: 1;
   margin: 0;
-  min-width: 28px;
-  padding: 0 8px;
+  min-width: 30px;
+  padding: 0 9px;
+  transition: background 140ms ease, color 140ms ease, opacity 140ms ease;
 }
 
 .ytml-offset-jump {
-  min-width: 34px;
+  color: rgba(255, 255, 255, 0.56);
+  min-width: 42px;
 }
 
 .ytml-offset-value {
-  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
   font-variant-numeric: tabular-nums;
-  min-width: 52px;
+  font-weight: 800;
+  min-width: 58px;
 }
 
 .ytml-offset-button:hover,
 .ytml-offset-value:hover,
 .ytml-offset-button:focus-visible,
 .ytml-offset-value:focus-visible {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.16);
   color: #fff;
   outline: none;
+}
+
+.ytml-offset-value:hover,
+.ytml-offset-value:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .ytml-body,
 .ytml-lines {
   position: relative;
+  z-index: 1;
 }
 
 .ytml-body {
@@ -157,7 +266,8 @@ html.ytml-suppress-native-lyrics ytmusic-player-page ytmusic-tab-renderer {
   opacity: 0.46;
   overflow-wrap: anywhere;
   outline: none;
-  transition: color 190ms ease, font-weight 190ms ease, opacity 190ms ease;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.42);
+  transition: color 190ms ease, filter 190ms ease, font-weight 190ms ease, opacity 190ms ease;
 }
 
 .ytml-line span {
@@ -166,11 +276,13 @@ html.ytml-suppress-native-lyrics ytmusic-player-page ytmusic-tab-renderer {
 }
 
 .ytml-line.is-past {
-  opacity: 0.28;
+  filter: blur(0.2px);
+  opacity: 0.26;
 }
 
 .ytml-line.is-future {
-  opacity: 0.48;
+  filter: blur(0.1px);
+  opacity: 0.42;
 }
 
 .ytml-line:hover,
@@ -187,12 +299,14 @@ html.ytml-suppress-native-lyrics ytmusic-player-page ytmusic-tab-renderer {
 }
 
 .ytml-line.is-active {
+  filter: none;
   font-weight: 850;
   opacity: 1;
 }
 
 .ytml-line.is-active span {
   color: #fff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
 }
 
 @media (max-width: 900px) {

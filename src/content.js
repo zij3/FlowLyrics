@@ -92,6 +92,7 @@
   function scanTrack(force) {
     const video = utils.getVideo();
     const track = trackReader.readTrack();
+    overlay.setArtworkUrl(track.artworkUrl);
     updatePlacement();
 
     if (!force && video?.ended) {
@@ -245,6 +246,7 @@
     state.trackKey = "";
     state.loading = false;
     state.nativePaneHoldUntil = 0;
+    overlay.setArtworkUrl("");
     clearLyrics();
   }
 
@@ -392,7 +394,7 @@
     overlay.setOffsetControlsVisible(state.hasSyncedLyrics && state.lines.length);
     overlay.updatePlacement({
       hostRect,
-      playerOpen,
+      playerOpen: playerOpen && !transitionHeld,
       visible
     });
     updateNativePaneVisibility(suppressNativePane);

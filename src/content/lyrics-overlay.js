@@ -1,16 +1,22 @@
 (() => {
   "use strict";
 
+  const PLAYER_BACKDROP_ENTER_MS = 560;
+  const PLAYER_BACKDROP_OPEN_DELAY_MS = 500;
+
   class LyricsOverlay {
     constructor({ formatOffset, onLineSeek, onOffsetChange, onShown } = {}) {
       this.autoScrollActive = true;
       this.edgeUpdateQueued = false;
       this.elements = {};
       this.formatOffset = formatOffset || ((offsetSeconds) => `${offsetSeconds.toFixed(1)}s`);
+      this.lastArtworkUrl = "";
       this.lastPlacement = "";
       this.onLineSeek = onLineSeek;
       this.onOffsetChange = onOffsetChange;
       this.onShown = onShown;
+      this.playerBackdropEnterTimerId = 0;
+      this.playerBackdropOpenTimerId = 0;
       this.visible = false;
 
       this.createInterface();
@@ -57,6 +63,25 @@
       this.elements.root.classList.toggle("ytml-has-offset-controls", Boolean(visible));
     }
 
+    setArtworkUrl(artworkUrl) {
+      const nextArtworkUrl = String(artworkUrl || "");
+      if (nextArtworkUrl === this.lastArtworkUrl) {
+        return;
+      }
+
+      this.lastArtworkUrl = nextArtworkUrl;
+      this.elements.root.classList.toggle("ytml-has-artwork", Boolean(nextArtworkUrl));
+      document.documentElement.classList.toggle("ytml-has-artwork", Boolean(nextArtworkUrl));
+      if (nextArtworkUrl) {
+        this.elements.root.style.setProperty("--ytml-artwork-url", `url(${JSON.stringify(nextArtworkUrl)})`);
+        document.documentElement.style.setProperty("--ytml-artwork-url", `url(${JSON.stringify(nextArtworkUrl)})`);
+      } else {
+        this.elements.root.style.removeProperty("--ytml-artwork-url");
+        document.documentElement.style.removeProperty("--ytml-artwork-url");
+      }
+      this.updatePlayerBackdropVisibility();
+    }
+
     updatePlacement({ hostRect, playerOpen, visible }) {
       if (visible) {
         this.applyPlacement(hostRect);
@@ -65,18 +90,21 @@
       }
 
       this.elements.root.classList.toggle("ytml-player-open", Boolean(playerOpen));
+      this.updatePlayerBackdropVisibility(playerOpen);
       this.setVisible(visible);
       this.queueEdgeLineUpdate();
     }
 
     hideImmediately() {
+      this.elements.root.classList.remove("ytml-player-open");
+      this.updatePlayerBackdropVisibility(false);
+
       if (!this.visible) {
         return;
       }
 
       this.lastPlacement = "";
       this.elements.root.classList.add("ytml-fast-hide");
-      this.elements.root.classList.remove("ytml-player-open");
       this.setVisible(false);
 
       requestAnimationFrame(() => {
@@ -108,11 +136,11 @@
       root.innerHTML = `
         <section class="ytml-panel" aria-live="polite">
           <div class="ytml-offset" aria-label="Lyric timing offset">
-            <button class="ytml-offset-button ytml-offset-jump" type="button" data-offset-action="decrease-large" aria-label="Show lyrics 1 second earlier" title="Show lyrics 1 second earlier">-1</button>
+            <button class="ytml-offset-button ytml-offset-jump" type="button" data-offset-action="decrease-large" aria-label="Show lyrics 1 second earlier" title="Show lyrics 1 second earlier">-1s</button>
             <button class="ytml-offset-button" type="button" data-offset-action="decrease" aria-label="Show lyrics 0.1 seconds earlier" title="Show lyrics 0.1 seconds earlier">-</button>
             <button class="ytml-offset-value" type="button" data-offset-action="reset" aria-label="Reset lyric offset" title="Reset lyric offset">0.0s</button>
             <button class="ytml-offset-button" type="button" data-offset-action="increase" aria-label="Show lyrics 0.1 seconds later" title="Show lyrics 0.1 seconds later">+</button>
-            <button class="ytml-offset-button ytml-offset-jump" type="button" data-offset-action="increase-large" aria-label="Show lyrics 1 second later" title="Show lyrics 1 second later">+1</button>
+            <button class="ytml-offset-button ytml-offset-jump" type="button" data-offset-action="increase-large" aria-label="Show lyrics 1 second later" title="Show lyrics 1 second later">+1s</button>
           </div>
           <main class="ytml-body">
             <div class="ytml-lines" role="list"></div>
@@ -195,6 +223,58 @@
         "PageDown",
         "PageUp"
       ].includes(key);
+    }
+
+    updatePlayerBackdropVisibility(playerOpen = this.elements.root.classList.contains("ytml-player-open")) {
+      const shouldShowBackdrop = Boolean(playerOpen && this.lastArtworkUrl);
+      if (!shouldShowBackdrop) {
+        this.deactivatePlayerBackdrop();
+        return;
+      }
+
+      if (
+        this.playerBackdropOpenTimerId
+        || document.documentElement.classList.contains("ytml-player-backdrop-active")
+      ) {
+        return;
+      }
+
+      this.playerBackdropOpenTimerId = setTimeout(() => {
+        this.playerBackdropOpenTimerId = 0;
+        if (this.elements.root.classList.contains("ytml-player-open") && this.lastArtworkUrl) {
+          this.activatePlayerBackdrop();
+        }
+      }, PLAYER_BACKDROP_OPEN_DELAY_MS);
+    }
+
+    activatePlayerBackdrop() {
+      const html = document.documentElement;
+      if (this.playerBackdropEnterTimerId) {
+        clearTimeout(this.playerBackdropEnterTimerId);
+      }
+
+      html.classList.add("ytml-player-backdrop-active", "ytml-player-backdrop-entering");
+      this.playerBackdropEnterTimerId = setTimeout(() => {
+        this.playerBackdropEnterTimerId = 0;
+        html.classList.remove("ytml-player-backdrop-entering");
+      }, PLAYER_BACKDROP_ENTER_MS);
+    }
+
+    deactivatePlayerBackdrop() {
+      if (this.playerBackdropOpenTimerId) {
+        clearTimeout(this.playerBackdropOpenTimerId);
+        this.playerBackdropOpenTimerId = 0;
+      }
+
+      if (this.playerBackdropEnterTimerId) {
+        clearTimeout(this.playerBackdropEnterTimerId);
+        this.playerBackdropEnterTimerId = 0;
+      }
+
+      document.documentElement.classList.remove(
+        "ytml-player-backdrop-active",
+        "ytml-player-backdrop-entering"
+      );
     }
 
     setVisible(visible) {
