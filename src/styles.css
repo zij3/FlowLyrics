@@ -117,6 +117,19 @@ html.ytml-player-backdrop-active ytmusic-player-page [id*="background"] {
   background: transparent !important;
 }
 
+html.ytml-player-backdrop-active ytmusic-player-page #song-image,
+html.ytml-player-backdrop-active ytmusic-player-page #song-image *,
+html.ytml-player-backdrop-active ytmusic-player-page *:has(> #song-image) {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.ytml-player-backdrop-active ytmusic-player-page #song-image {
+  transform: scale(0.85);
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
 html.ytml-player-backdrop-active ytmusic-nav-bar,
 html.ytml-player-backdrop-active ytmusic-guide-renderer,
 html.ytml-player-backdrop-active ytmusic-player-bar {
@@ -318,7 +331,8 @@ html.ytml-player-backdrop-active ytmusic-player-bar {
 @media (prefers-reduced-motion: reduce) {
   .ytml-panel,
   .ytml-offset,
-  .ytml-line {
+  .ytml-line,
+  html.ytml-player-backdrop-active ytmusic-player-page #song-image {
     transition: none;
   }
 
