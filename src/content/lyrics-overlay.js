@@ -4,7 +4,8 @@
   const PLAYER_BACKDROP_ENTER_MS = 150;
   const PLAYER_BACKDROP_EXIT_MS = 150;
   const PLAYER_BACKDROP_OPEN_DELAY_MS = 150;
-  const FULLSCREEN_BOTTOM_SAFE_PX = 152;
+  const FULLSCREEN_BOTTOM_SAFE_PX = 180;
+  const FULLSCREEN_ACTIVE_TOP_OFFSET_PX = 132;
   const LYRIC_BALANCE_LOOKAROUND = 3;
   const LYRIC_BALANCE_MAX_SHIFT_PX = 84;
   const LYRIC_BALANCE_WEIGHT = 0.34;
@@ -483,12 +484,17 @@
 
       const firstVisible = visibleLines[0];
       const lastVisible = visibleLines[visibleLines.length - 1];
-      const edgeLines = [
-        [lineEntries[firstVisible.position - 1], "top"],
-        [firstVisible, "top"],
-        [lastVisible, "bottom"],
-        [lineEntries[lastVisible.position + 1], "bottom"]
-      ];
+      const edgeLines = this.fullscreenActive
+        ? [
+            [lastVisible, "bottom"],
+            [lineEntries[lastVisible.position + 1], "bottom"]
+          ]
+        : [
+            [lineEntries[firstVisible.position - 1], "top"],
+            [firstVisible, "top"],
+            [lastVisible, "bottom"],
+            [lineEntries[lastVisible.position + 1], "bottom"]
+          ];
 
       for (const [entry, edge] of edgeLines) {
         this.hideEdgeLine(entry, edge, containerRect, lineElements.length);
@@ -512,15 +518,34 @@
     }
 
     scrollLyricListTo(activeElement, instant) {
-      const targetTop = activeElement.offsetTop
-        - (this.elements.lines.clientHeight / 2)
-        + (activeElement.offsetHeight / 2)
-        + this.calculateLyricBalanceShift(activeElement);
+      const targetTop = this.fullscreenActive
+        ? this.calculateFullscreenLyricTarget(activeElement)
+        : activeElement.offsetTop
+          - (this.elements.lines.clientHeight / 2)
+          + (activeElement.offsetHeight / 2)
+          + this.calculateLyricBalanceShift(activeElement);
 
       this.elements.lines.scrollTo({
         top: Math.max(0, targetTop),
         behavior: instant ? "auto" : "smooth"
       });
+    }
+
+    calculateFullscreenLyricTarget(activeElement) {
+      const previousElement = activeElement.previousElementSibling?.classList?.contains("ytml-line")
+        ? activeElement.previousElementSibling
+        : null;
+      const previousRect = previousElement?.getBoundingClientRect();
+      const activeRect = activeElement.getBoundingClientRect();
+      const previousSpace = previousRect?.height
+        ? previousRect.height + Math.max(18, activeRect.height * 0.22)
+        : activeElement.offsetHeight * 1.1;
+      const topOffset = Math.min(
+        this.elements.lines.clientHeight * 0.28,
+        Math.max(FULLSCREEN_ACTIVE_TOP_OFFSET_PX, previousSpace)
+      );
+
+      return activeElement.offsetTop - topOffset;
     }
 
     calculateLyricBalanceShift(activeElement) {
