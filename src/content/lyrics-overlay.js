@@ -1,9 +1,9 @@
 (() => {
   "use strict";
 
-  const PLAYER_BACKDROP_ENTER_MS = 560;
+  const PLAYER_BACKDROP_ENTER_MS = 150;
   const PLAYER_BACKDROP_EXIT_MS = 150;
-  const PLAYER_BACKDROP_OPEN_DELAY_MS = 250;
+  const PLAYER_BACKDROP_OPEN_DELAY_MS = 150;
 
   class LyricsOverlay {
     constructor({ formatOffset, onLineSeek, onOffsetChange, onShown } = {}) {
