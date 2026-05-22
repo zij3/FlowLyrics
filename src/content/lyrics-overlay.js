@@ -5,7 +5,7 @@
   const PLAYER_BACKDROP_EXIT_MS = 150;
   const PLAYER_BACKDROP_OPEN_DELAY_MS = 150;
   const FULLSCREEN_BOTTOM_SAFE_PX = 180;
-  const FULLSCREEN_ACTIVE_TOP_OFFSET_PX = 132;
+  const FULLSCREEN_ACTIVE_TOP_OFFSET_PX = 220;
   const LYRIC_BALANCE_LOOKAROUND = 3;
   const LYRIC_BALANCE_MAX_SHIFT_PX = 84;
   const LYRIC_BALANCE_WEIGHT = 0.34;
@@ -210,12 +210,11 @@
             <button class="ytml-offset-value" type="button" data-offset-action="reset" aria-label="Reset lyric offset" title="Reset lyric offset">0.0s</button>
             <button class="ytml-offset-button" type="button" data-offset-action="increase" aria-label="Show lyrics 0.1 seconds later" title="Show lyrics 0.1 seconds later">+</button>
             <button class="ytml-offset-button ytml-offset-jump" type="button" data-offset-action="increase-large" aria-label="Show lyrics 1 second later" title="Show lyrics 1 second later">+1s</button>
-            <span class="ytml-offset-separator" aria-hidden="true"></span>
-            <button class="ytml-offset-button ytml-fullscreen-button" type="button" data-fullscreen-action="toggle" aria-label="Enter fullscreen lyrics" aria-pressed="false" title="Enter fullscreen lyrics"></button>
           </div>
           <main class="ytml-body">
             <div class="ytml-lines" role="list"></div>
           </main>
+          <button class="ytml-fullscreen-button" type="button" aria-label="Enter fullscreen lyrics" aria-pressed="false" title="Enter fullscreen lyrics"></button>
         </section>
       `;
 
@@ -228,16 +227,14 @@
       this.setAutoScrollActive(true);
 
       root.querySelector(".ytml-offset").addEventListener("click", (event) => {
-        const fullscreenAction = event.target.closest("[data-fullscreen-action]")?.dataset.fullscreenAction;
-        if (fullscreenAction) {
-          this.onFullscreenToggle?.();
-          return;
-        }
-
         const action = event.target.closest("[data-offset-action]")?.dataset.offsetAction;
         if (action) {
           this.onOffsetChange?.(action);
         }
+      });
+
+      this.elements.fullscreenButton.addEventListener("click", () => {
+        this.onFullscreenToggle?.();
       });
 
       this.elements.lines.addEventListener("click", (event) => {
@@ -532,20 +529,35 @@
     }
 
     calculateFullscreenLyricTarget(activeElement) {
-      const previousElement = activeElement.previousElementSibling?.classList?.contains("ytml-line")
-        ? activeElement.previousElementSibling
-        : null;
-      const previousRect = previousElement?.getBoundingClientRect();
       const activeRect = activeElement.getBoundingClientRect();
-      const previousSpace = previousRect?.height
-        ? previousRect.height + Math.max(18, activeRect.height * 0.22)
-        : activeElement.offsetHeight * 1.1;
+      const previousRows = this.getPreviousLyricRows(activeElement, 2);
+      const previousSpace = previousRows.length
+        ? previousRows.reduce((total, row) => total + row.height, 0)
+          + (previousRows.length * Math.max(18, activeRect.height * 0.22))
+        : activeElement.offsetHeight * 1.2;
       const topOffset = Math.min(
-        this.elements.lines.clientHeight * 0.28,
+        this.elements.lines.clientHeight * 0.36,
         Math.max(FULLSCREEN_ACTIVE_TOP_OFFSET_PX, previousSpace)
       );
 
       return activeElement.offsetTop - topOffset;
+    }
+
+    getPreviousLyricRows(activeElement, count) {
+      const rows = [];
+      let previousElement = activeElement.previousElementSibling;
+
+      while (previousElement && rows.length < count) {
+        if (previousElement.classList?.contains("ytml-line")) {
+          const rect = previousElement.getBoundingClientRect();
+          rows.push({
+            height: rect.height || previousElement.offsetHeight || 0
+          });
+        }
+        previousElement = previousElement.previousElementSibling;
+      }
+
+      return rows;
     }
 
     calculateLyricBalanceShift(activeElement) {

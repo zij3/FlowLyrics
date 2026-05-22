@@ -182,28 +182,73 @@ html.ytml-fullscreen-mode ytmusic-player-bar {
 
 html.ytml-fullscreen-mode ytmusic-player-bar img {
   border-radius: 6px !important;
-  height: 70px !important;
+  height: 78px !important;
   object-fit: cover !important;
-  width: 70px !important;
+  width: 78px !important;
 }
 
 html.ytml-fullscreen-mode ytmusic-player-bar button,
 html.ytml-fullscreen-mode ytmusic-player-bar tp-yt-paper-icon-button,
 html.ytml-fullscreen-mode ytmusic-player-bar yt-icon-button,
 html.ytml-fullscreen-mode ytmusic-player-bar [role="button"] {
-  transform: scale(1.22);
+  align-items: center !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  transform: none;
   transform-origin: center;
 }
 
+html.ytml-fullscreen-mode ytmusic-player-bar yt-icon {
+  height: 32px !important;
+  margin: 0 !important;
+  width: 32px !important;
+}
+
+html.ytml-fullscreen-mode ytmusic-player-bar #play-pause-button,
+html.ytml-fullscreen-mode ytmusic-player-bar .play-pause-button,
+html.ytml-fullscreen-mode ytmusic-player-bar [aria-label="Play"],
+html.ytml-fullscreen-mode ytmusic-player-bar [aria-label="Pause"],
+html.ytml-fullscreen-mode ytmusic-player-bar [aria-label^="Play "],
+html.ytml-fullscreen-mode ytmusic-player-bar [aria-label^="Pause "] {
+  border-radius: 999px !important;
+  height: 76px !important;
+  min-height: 76px !important;
+  min-width: 76px !important;
+  padding: 0 !important;
+  width: 76px !important;
+}
+
+html.ytml-fullscreen-mode ytmusic-player-bar #play-pause-button yt-icon,
+html.ytml-fullscreen-mode ytmusic-player-bar .play-pause-button yt-icon,
+html.ytml-fullscreen-mode ytmusic-player-bar [aria-label="Play"] yt-icon,
+html.ytml-fullscreen-mode ytmusic-player-bar [aria-label="Pause"] yt-icon,
+html.ytml-fullscreen-mode ytmusic-player-bar [aria-label^="Play "] yt-icon,
+html.ytml-fullscreen-mode ytmusic-player-bar [aria-label^="Pause "] yt-icon {
+  height: 44px !important;
+  left: auto !important;
+  margin: 0 !important;
+  position: static !important;
+  top: auto !important;
+  transform: none !important;
+  width: 44px !important;
+}
+
 html.ytml-fullscreen-mode ytmusic-player-bar .title,
-html.ytml-fullscreen-mode ytmusic-player-bar yt-formatted-string.title {
-  font-size: 18px !important;
+html.ytml-fullscreen-mode ytmusic-player-bar yt-formatted-string.title,
+html.ytml-fullscreen-mode ytmusic-player-bar .song-info .title,
+html.ytml-fullscreen-mode ytmusic-player-bar .content-info-wrapper .title {
+  font-size: 22px !important;
   line-height: 1.25 !important;
 }
 
 html.ytml-fullscreen-mode ytmusic-player-bar .byline,
-html.ytml-fullscreen-mode ytmusic-player-bar .subtitle {
-  font-size: 16px !important;
+html.ytml-fullscreen-mode ytmusic-player-bar .subtitle,
+html.ytml-fullscreen-mode ytmusic-player-bar .song-info .byline,
+html.ytml-fullscreen-mode ytmusic-player-bar .content-info-wrapper .byline,
+html.ytml-fullscreen-mode ytmusic-player-bar .content-info-wrapper .subtitle,
+html.ytml-fullscreen-mode ytmusic-player-bar .content-info-wrapper yt-formatted-string:not(.title),
+html.ytml-fullscreen-mode ytmusic-player-bar .content-info-wrapper a {
+  font-size: 18px !important;
   line-height: 1.25 !important;
 }
 
@@ -299,13 +344,6 @@ html.ytml-fullscreen-mode ytmusic-player-bar .subtitle {
   min-width: 42px;
 }
 
-.ytml-offset-separator {
-  background: rgba(255, 255, 255, 0.14);
-  height: 18px;
-  margin: 0 2px;
-  width: 1px;
-}
-
 .ytml-offset-value {
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.9);
@@ -329,10 +367,29 @@ html.ytml-fullscreen-mode ytmusic-player-bar .subtitle {
 }
 
 .ytml-fullscreen-button {
-  min-width: 30px;
+  align-items: center;
+  appearance: none;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: rgba(12, 12, 12, 0.58);
+  border: 0;
+  border-radius: 999px;
+  bottom: 18px;
+  color: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  display: inline-flex;
+  height: 38px;
+  justify-content: center;
+  margin: 0;
+  opacity: 0;
   padding: 0;
-  position: relative;
-  width: 30px;
+  pointer-events: none;
+  position: absolute;
+  right: 18px;
+  transform: translateY(4px);
+  transition: background 140ms ease, color 140ms ease, opacity 160ms ease, transform 160ms ease;
+  width: 38px;
+  z-index: 2;
 }
 
 .ytml-fullscreen-button::before {
@@ -348,6 +405,41 @@ html.ytml-fullscreen-mode ytmusic-player-bar .subtitle {
   content: "";
   height: 15px;
   width: 15px;
+}
+
+#ytml-root.ytml-has-offset-controls .ytml-panel:hover .ytml-fullscreen-button,
+#ytml-root.ytml-has-offset-controls .ytml-panel:focus-within .ytml-fullscreen-button {
+  opacity: 0.72;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+#ytml-root.ytml-has-offset-controls .ytml-panel:hover .ytml-fullscreen-button:hover,
+#ytml-root.ytml-has-offset-controls .ytml-panel:focus-within .ytml-fullscreen-button:focus-visible {
+  opacity: 1;
+}
+
+.ytml-fullscreen-button:hover,
+.ytml-fullscreen-button:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  outline: none;
+}
+
+#ytml-root.ytml-fullscreen-active .ytml-offset {
+  display: none;
+}
+
+#ytml-root.ytml-fullscreen-active .ytml-fullscreen-button {
+  bottom: 28px;
+  opacity: 0.82;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+#ytml-root.ytml-fullscreen-active .ytml-fullscreen-button:hover,
+#ytml-root.ytml-fullscreen-active .ytml-fullscreen-button:focus-visible {
+  opacity: 1;
 }
 
 #ytml-root.ytml-fullscreen-active .ytml-fullscreen-button::before,
