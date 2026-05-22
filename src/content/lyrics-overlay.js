@@ -3,6 +3,8 @@
 
   class LyricsOverlay {
     constructor({ formatOffset, onLineSeek, onOffsetChange, onShown } = {}) {
+      this.autoScrollActive = true;
+      this.edgeUpdateQueued = false;
       this.elements = {};
       this.formatOffset = formatOffset || ((offsetSeconds) => `${offsetSeconds.toFixed(1)}s`);
       this.lastPlacement = "";
@@ -17,6 +19,7 @@
     clearLines() {
       this.elements.lines.textContent = "";
       this.elements.lines.scrollTop = 0;
+      this.queueEdgeLineUpdate();
     }
 
     renderLines(lines) {
@@ -39,6 +42,7 @@
       }
 
       this.elements.lines.appendChild(fragment);
+      this.queueEdgeLineUpdate();
     }
 
     setLoading(loading) {
@@ -62,6 +66,7 @@
 
       this.elements.root.classList.toggle("ytml-player-open", Boolean(playerOpen));
       this.setVisible(visible);
+      this.queueEdgeLineUpdate();
     }
 
     hideImmediately() {
@@ -91,8 +96,10 @@
 
       const activeElement = this.elements.lines.querySelector(`.ytml-line[data-index="${activeIndex}"]`);
       if (activeElement) {
+        this.setAutoScrollActive(true);
         this.scrollLyricListTo(activeElement, forceScroll);
       }
+      this.queueEdgeLineUpdate();
     }
 
     createInterface() {
@@ -118,6 +125,7 @@
       this.elements.root = root;
       this.elements.lines = root.querySelector(".ytml-lines");
       this.elements.offsetValue = root.querySelector(".ytml-offset-value");
+      this.setAutoScrollActive(true);
 
       root.querySelector(".ytml-offset").addEventListener("click", (event) => {
         const action = event.target.closest("[data-offset-action]")?.dataset.offsetAction;
@@ -130,8 +138,23 @@
         this.handleLineActivation(event.target);
       });
 
+      this.elements.lines.addEventListener("scroll", () => {
+        this.queueEdgeLineUpdate();
+      }, { passive: true });
+
+      this.elements.lines.addEventListener("wheel", () => {
+        this.setAutoScrollActive(false);
+      }, { passive: true });
+
+      this.elements.lines.addEventListener("touchmove", () => {
+        this.setAutoScrollActive(false);
+      }, { passive: true });
+
       this.elements.lines.addEventListener("keydown", (event) => {
         if (event.key !== "Enter" && event.key !== " ") {
+          if (this.isManualScrollKey(event.key)) {
+            this.setAutoScrollActive(false);
+          }
           return;
         }
 
@@ -157,6 +180,23 @@
       }
     }
 
+    setAutoScrollActive(active) {
+      this.autoScrollActive = Boolean(active);
+      this.elements.root.classList.toggle("ytml-autoscroll-active", this.autoScrollActive);
+      this.queueEdgeLineUpdate();
+    }
+
+    isManualScrollKey(key) {
+      return [
+        "ArrowDown",
+        "ArrowUp",
+        "End",
+        "Home",
+        "PageDown",
+        "PageUp"
+      ].includes(key);
+    }
+
     setVisible(visible) {
       const wasVisible = this.visible;
       this.visible = Boolean(visible);
@@ -166,6 +206,8 @@
       if (this.visible && !wasVisible) {
         this.onShown?.();
       }
+
+      this.queueEdgeLineUpdate();
     }
 
     applyPlacement(hostRect) {
@@ -185,6 +227,72 @@
       this.elements.root.style.setProperty("--ytml-top", `${hostRect.top}px`);
       this.elements.root.style.setProperty("--ytml-width", `${hostRect.width}px`);
       this.elements.root.style.setProperty("--ytml-height", `${hostRect.height}px`);
+    }
+
+    queueEdgeLineUpdate() {
+      if (this.edgeUpdateQueued) {
+        return;
+      }
+
+      this.edgeUpdateQueued = true;
+      requestAnimationFrame(() => {
+        this.edgeUpdateQueued = false;
+        this.updateEdgeLineVisibility();
+      });
+    }
+
+    updateEdgeLineVisibility() {
+      const lineElements = [...this.elements.lines.querySelectorAll(".ytml-line")];
+      for (const lineElement of lineElements) {
+        lineElement.classList.remove("is-edge-hidden");
+      }
+
+      if (!this.visible || !this.autoScrollActive || lineElements.length < 4) {
+        return;
+      }
+
+      const containerRect = this.elements.lines.getBoundingClientRect();
+      const lineEntries = lineElements.map((lineElement, position) => ({
+        element: lineElement,
+        index: Number(lineElement.dataset.index),
+        position,
+        rect: lineElement.getBoundingClientRect()
+      }));
+      const visibleLines = lineEntries
+        .filter(({ rect }) => rect.bottom > containerRect.top && rect.top < containerRect.bottom);
+
+      if (visibleLines.length < 4) {
+        return;
+      }
+
+      const firstVisible = visibleLines[0];
+      const lastVisible = visibleLines[visibleLines.length - 1];
+      const edgeLines = [
+        [lineEntries[firstVisible.position - 1], "top"],
+        [firstVisible, "top"],
+        [lastVisible, "bottom"],
+        [lineEntries[lastVisible.position + 1], "bottom"]
+      ];
+
+      for (const [entry, edge] of edgeLines) {
+        this.hideEdgeLine(entry, edge, containerRect, lineElements.length);
+      }
+    }
+
+    hideEdgeLine(entry, edge, containerRect, lineCount) {
+      if (!entry || entry.element.classList.contains("is-active")) {
+        return;
+      }
+
+      if (edge === "top" && entry.index < 2 && entry.rect.top > containerRect.top) {
+        return;
+      }
+
+      if (edge === "bottom" && entry.index >= lineCount - 2) {
+        return;
+      }
+
+      entry.element.classList.add("is-edge-hidden");
     }
 
     scrollLyricListTo(activeElement, instant) {

@@ -179,6 +179,13 @@ html.ytml-suppress-native-lyrics ytmusic-player-page ytmusic-tab-renderer {
   opacity: 0.78;
 }
 
+.ytml-line.is-edge-hidden,
+.ytml-line.is-edge-hidden:hover,
+.ytml-line.is-edge-hidden:focus-visible {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .ytml-line.is-active {
   font-weight: 850;
   opacity: 1;
