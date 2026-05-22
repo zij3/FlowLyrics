@@ -3,6 +3,8 @@
 Download the extension ZIP:
 [FlowLyrics-0.3.0.zip](FlowLyrics-0.3.0.zip)
 
+FlowLyrics replaces YouTube Music's static Lyrics tab with animated synced lyrics when LRCLIB has timing data. If synced lyrics are not available, YouTube Music's own lyrics stay visible.
+
 <table>
   <tr>
     <td><strong>Before</strong></td>
@@ -14,9 +16,13 @@ Download the extension ZIP:
   </tr>
 </table>
 
-FlowLyrics for YouTube Music is a Chrome extension that replaces the native Lyrics tab with animated synced lyrics when LRCLIB has synced LRC lyrics for the current track.
+Click any synced lyric line to jump to that moment in the song.
 
-This extension is distributed from GitHub instead of the Chrome Web Store, so it must be installed with Chrome's "Load unpacked" developer-mode flow.
+## Offset
+
+<img src="assets/offset.png" alt="FlowLyrics offset controls" width="420">
+
+If lyrics feel slightly early or late, use the offset controls to nudge timing by `0.1s` or `1s`. The center value resets to `0.0s`, and your offset is saved locally.
 
 ## Install
 
@@ -31,16 +37,7 @@ This extension is distributed from GitHub instead of the Chrome Web Store, so it
 7. Open or refresh:
    `https://music.youtube.com`
 
-Open the full player and click YouTube Music's Lyrics tab. When synced lyrics are available, the extension replaces the static lyrics pane with animated synced lyrics. If synced lyrics are not available, YouTube Music's own static lyrics stay visible.
-
-## What It Does
-
-- Detects the current YouTube Music track from the player bar and media session.
-- Fetches synced LRC lyrics from LRCLIB when available.
-- Animates the active lyric line against the real `<video>` playback time.
-- Jumps playback to a synced line when you click it.
-- Saves a timing offset for synced lyrics with small and large adjustment steps.
-- Leaves YouTube Music's static lyrics alone when synced lyrics are not available.
+Open the full player and click YouTube Music's Lyrics tab.
 
 ## Repository Layout
 
