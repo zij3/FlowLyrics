@@ -1,7 +1,7 @@
 # FlowLyrics
 
 Download the extension ZIP:
-[FlowLyrics-0.4.11.zip](FlowLyrics-0.4.11.zip)
+[FlowLyrics-0.5.6.zip](FlowLyrics-0.5.6.zip)
 
 FlowLyrics replaces YouTube Music's static Lyrics tab with animated synced lyrics when LRCLIB has timing data. If synced lyrics are not available, YouTube Music's own lyrics stay visible.
 
@@ -17,6 +17,10 @@ FlowLyrics replaces YouTube Music's static Lyrics tab with animated synced lyric
 </table>
 
 Click any synced lyric line to jump to that moment in the song.
+
+## Fullscreen Lyrics
+
+Hover the lyrics pane to reveal the timing controls, then click the fullscreen button beside them for a larger karaoke-style lyrics view that keeps YouTube Music's player UI available.
 
 ## Offset
 

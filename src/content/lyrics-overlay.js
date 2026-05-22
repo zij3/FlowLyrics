@@ -4,19 +4,23 @@
   const PLAYER_BACKDROP_ENTER_MS = 150;
   const PLAYER_BACKDROP_EXIT_MS = 150;
   const PLAYER_BACKDROP_OPEN_DELAY_MS = 150;
+  const FULLSCREEN_BOTTOM_SAFE_PX = 180;
+  const FULLSCREEN_ACTIVE_TOP_OFFSET_PX = 220;
   const LYRIC_BALANCE_LOOKAROUND = 3;
   const LYRIC_BALANCE_MAX_SHIFT_PX = 84;
   const LYRIC_BALANCE_WEIGHT = 0.34;
 
   class LyricsOverlay {
-    constructor({ formatOffset, onLineSeek, onOffsetChange, onShown } = {}) {
+    constructor({ formatOffset, onFullscreenToggle, onLineSeek, onOffsetChange, onShown } = {}) {
       this.activeIndex = -1;
       this.autoScrollActive = true;
       this.edgeUpdateQueued = false;
       this.elements = {};
       this.formatOffset = formatOffset || ((offsetSeconds) => `${offsetSeconds.toFixed(1)}s`);
+      this.fullscreenActive = false;
       this.lastArtworkUrl = "";
       this.lastPlacement = "";
+      this.onFullscreenToggle = onFullscreenToggle;
       this.onLineSeek = onLineSeek;
       this.onOffsetChange = onOffsetChange;
       this.onShown = onShown;
@@ -89,7 +93,9 @@
       this.updatePlayerBackdropVisibility();
     }
 
-    updatePlacement({ hostRect, playerOpen, visible }) {
+    updatePlacement({ fullscreenActive, hostRect, playerOpen, visible }) {
+      this.setFullscreenActive(Boolean(visible && fullscreenActive));
+
       if (visible) {
         this.applyPlacement(hostRect);
       } else if (this.lastPlacement) {
@@ -208,6 +214,7 @@
           <main class="ytml-body">
             <div class="ytml-lines" role="list"></div>
           </main>
+          <button class="ytml-fullscreen-button" type="button" aria-label="Enter fullscreen lyrics" aria-pressed="false" title="Enter fullscreen lyrics"></button>
         </section>
       `;
 
@@ -215,6 +222,7 @@
 
       this.elements.root = root;
       this.elements.lines = root.querySelector(".ytml-lines");
+      this.elements.fullscreenButton = root.querySelector(".ytml-fullscreen-button");
       this.elements.offsetValue = root.querySelector(".ytml-offset-value");
       this.setAutoScrollActive(true);
 
@@ -223,6 +231,10 @@
         if (action) {
           this.onOffsetChange?.(action);
         }
+      });
+
+      this.elements.fullscreenButton.addEventListener("click", () => {
+        this.onFullscreenToggle?.();
       });
 
       this.elements.lines.addEventListener("click", (event) => {
@@ -380,12 +392,32 @@
       this.queueEdgeLineUpdate();
     }
 
+    setFullscreenActive(active) {
+      const fullscreenActive = Boolean(active);
+      if (fullscreenActive === this.fullscreenActive) {
+        return;
+      }
+
+      this.fullscreenActive = fullscreenActive;
+      this.lastPlacement = "";
+      this.elements.root.classList.toggle("ytml-fullscreen-active", this.fullscreenActive);
+      document.documentElement.classList.toggle("ytml-fullscreen-mode", this.fullscreenActive);
+
+      if (this.elements.fullscreenButton) {
+        const label = this.fullscreenActive ? "Exit fullscreen lyrics" : "Enter fullscreen lyrics";
+        this.elements.fullscreenButton.setAttribute("aria-label", label);
+        this.elements.fullscreenButton.setAttribute("aria-pressed", String(this.fullscreenActive));
+        this.elements.fullscreenButton.title = label;
+      }
+    }
+
     applyPlacement(hostRect) {
+      const rect = this.fullscreenActive ? this.getFullscreenPlacement() : hostRect;
       const placement = [
-        Math.round(hostRect.left),
-        Math.round(hostRect.top),
-        Math.round(hostRect.width),
-        Math.round(hostRect.height)
+        Math.round(rect.left),
+        Math.round(rect.top),
+        Math.round(rect.width),
+        Math.round(rect.height)
       ].join(":");
 
       if (placement === this.lastPlacement) {
@@ -393,10 +425,22 @@
       }
 
       this.lastPlacement = placement;
-      this.elements.root.style.setProperty("--ytml-left", `${hostRect.left}px`);
-      this.elements.root.style.setProperty("--ytml-top", `${hostRect.top}px`);
-      this.elements.root.style.setProperty("--ytml-width", `${hostRect.width}px`);
-      this.elements.root.style.setProperty("--ytml-height", `${hostRect.height}px`);
+      this.elements.root.style.setProperty("--ytml-left", `${rect.left}px`);
+      this.elements.root.style.setProperty("--ytml-top", `${rect.top}px`);
+      this.elements.root.style.setProperty("--ytml-width", `${rect.width}px`);
+      this.elements.root.style.setProperty("--ytml-height", `${rect.height}px`);
+    }
+
+    getFullscreenPlacement() {
+      const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+      return {
+        left: 0,
+        top: 0,
+        width: Math.max(320, viewportWidth),
+        height: Math.max(320, viewportHeight - FULLSCREEN_BOTTOM_SAFE_PX)
+      };
     }
 
     queueEdgeLineUpdate() {
@@ -437,12 +481,17 @@
 
       const firstVisible = visibleLines[0];
       const lastVisible = visibleLines[visibleLines.length - 1];
-      const edgeLines = [
-        [lineEntries[firstVisible.position - 1], "top"],
-        [firstVisible, "top"],
-        [lastVisible, "bottom"],
-        [lineEntries[lastVisible.position + 1], "bottom"]
-      ];
+      const edgeLines = this.fullscreenActive
+        ? [
+            [lastVisible, "bottom"],
+            [lineEntries[lastVisible.position + 1], "bottom"]
+          ]
+        : [
+            [lineEntries[firstVisible.position - 1], "top"],
+            [firstVisible, "top"],
+            [lastVisible, "bottom"],
+            [lineEntries[lastVisible.position + 1], "bottom"]
+          ];
 
       for (const [entry, edge] of edgeLines) {
         this.hideEdgeLine(entry, edge, containerRect, lineElements.length);
@@ -466,15 +515,49 @@
     }
 
     scrollLyricListTo(activeElement, instant) {
-      const targetTop = activeElement.offsetTop
-        - (this.elements.lines.clientHeight / 2)
-        + (activeElement.offsetHeight / 2)
-        + this.calculateLyricBalanceShift(activeElement);
+      const targetTop = this.fullscreenActive
+        ? this.calculateFullscreenLyricTarget(activeElement)
+        : activeElement.offsetTop
+          - (this.elements.lines.clientHeight / 2)
+          + (activeElement.offsetHeight / 2)
+          + this.calculateLyricBalanceShift(activeElement);
 
       this.elements.lines.scrollTo({
         top: Math.max(0, targetTop),
         behavior: instant ? "auto" : "smooth"
       });
+    }
+
+    calculateFullscreenLyricTarget(activeElement) {
+      const activeRect = activeElement.getBoundingClientRect();
+      const previousRows = this.getPreviousLyricRows(activeElement, 2);
+      const previousSpace = previousRows.length
+        ? previousRows.reduce((total, row) => total + row.height, 0)
+          + (previousRows.length * Math.max(18, activeRect.height * 0.22))
+        : activeElement.offsetHeight * 1.2;
+      const topOffset = Math.min(
+        this.elements.lines.clientHeight * 0.36,
+        Math.max(FULLSCREEN_ACTIVE_TOP_OFFSET_PX, previousSpace)
+      );
+
+      return activeElement.offsetTop - topOffset;
+    }
+
+    getPreviousLyricRows(activeElement, count) {
+      const rows = [];
+      let previousElement = activeElement.previousElementSibling;
+
+      while (previousElement && rows.length < count) {
+        if (previousElement.classList?.contains("ytml-line")) {
+          const rect = previousElement.getBoundingClientRect();
+          rows.push({
+            height: rect.height || previousElement.offsetHeight || 0
+          });
+        }
+        previousElement = previousElement.previousElementSibling;
+      }
+
+      return rows;
     }
 
     calculateLyricBalanceShift(activeElement) {
