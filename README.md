@@ -18,6 +18,7 @@ Download the latest extension ZIP:
   </tr>
 </table>
 
+### Fullscreen Mode
 <img src="assets/fullscreen.png" alt="FlowLyrics fullscreen lyrics mode" width="860">
 
 ## Features
