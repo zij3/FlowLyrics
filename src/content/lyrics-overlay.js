@@ -6,9 +6,22 @@
   const PLAYER_BACKDROP_OPEN_DELAY_MS = 150;
   const FULLSCREEN_BOTTOM_SAFE_PX = 180;
   const FULLSCREEN_ACTIVE_TOP_OFFSET_PX = 220;
+  const FULLSCREEN_MAX_TOP_OFFSET_RATIO = 0.36;
+  const FULLSCREEN_PREVIOUS_ROW_COUNT = 3;
+  const FULLSCREEN_ROW_GAP_MIN_PX = 18;
+  const FULLSCREEN_ROW_GAP_RATIO = 0.22;
+  const FULLSCREEN_PREVIOUS_SPACE_FALLBACK_RATIO = 1.2;
   const LYRIC_BALANCE_LOOKAROUND = 3;
   const LYRIC_BALANCE_MAX_SHIFT_PX = 84;
   const LYRIC_BALANCE_WEIGHT = 0.34;
+  const MANUAL_SCROLL_KEYS = new Set([
+    "ArrowDown",
+    "ArrowUp",
+    "End",
+    "Home",
+    "PageDown",
+    "PageUp"
+  ]);
 
   class LyricsOverlay {
     constructor({ formatOffset, onFullscreenToggle, onLineSeek, onOffsetChange, onShown } = {}) {
@@ -297,14 +310,7 @@
     }
 
     isManualScrollKey(key) {
-      return [
-        "ArrowDown",
-        "ArrowUp",
-        "End",
-        "Home",
-        "PageDown",
-        "PageUp"
-      ].includes(key);
+      return MANUAL_SCROLL_KEYS.has(key);
     }
 
     updatePlayerBackdropVisibility(playerOpen = this.elements.root.classList.contains("ytml-player-open")) {
@@ -530,17 +536,21 @@
 
     calculateFullscreenLyricTarget(activeElement) {
       const activeRect = activeElement.getBoundingClientRect();
-      const previousRows = this.getPreviousLyricRows(activeElement, 3);
+      const previousRows = this.getPreviousLyricRows(activeElement, FULLSCREEN_PREVIOUS_ROW_COUNT);
       const previousSpace = previousRows.length
         ? previousRows.reduce((total, row) => total + row.height, 0)
-          + (previousRows.length * Math.max(18, activeRect.height * 0.22))
-        : activeElement.offsetHeight * 1.2;
+          + (previousRows.length * this.getFullscreenRowGap(activeRect.height))
+        : activeElement.offsetHeight * FULLSCREEN_PREVIOUS_SPACE_FALLBACK_RATIO;
       const topOffset = Math.min(
-        this.elements.lines.clientHeight * 0.36,
+        this.elements.lines.clientHeight * FULLSCREEN_MAX_TOP_OFFSET_RATIO,
         Math.max(FULLSCREEN_ACTIVE_TOP_OFFSET_PX, previousSpace)
       );
 
       return activeElement.offsetTop - topOffset;
+    }
+
+    getFullscreenRowGap(activeLineHeight) {
+      return Math.max(FULLSCREEN_ROW_GAP_MIN_PX, activeLineHeight * FULLSCREEN_ROW_GAP_RATIO);
     }
 
     getPreviousLyricRows(activeElement, count) {

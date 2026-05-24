@@ -149,6 +149,11 @@ html.ytml-player-backdrop-active ytmusic-player-page #song-image {
 html.ytml-fullscreen-mode {
   --ytml-fullscreen-bottom-bar-height: 158px;
   --ytml-fullscreen-side-padding: clamp(46px, 7vw, 132px);
+  --ytml-player-badge-size: 18px;
+  --ytml-player-control-icon-size: 32px;
+  --ytml-player-play-button-size: 76px;
+  --ytml-player-play-icon-size: 44px;
+  --ytml-player-thumbnail-size: 78px;
 }
 
 html.ytml-fullscreen-mode ytmusic-player-page tp-yt-paper-tabs,
@@ -182,10 +187,10 @@ html.ytml-fullscreen-mode ytmusic-player-bar {
 
 html.ytml-fullscreen-mode ytmusic-player-bar img {
   border-radius: 6px !important;
-  height: 78px !important;
+  height: var(--ytml-player-thumbnail-size) !important;
   object-fit: cover !important;
   transform: translateY(-10px);
-  width: 78px !important;
+  width: var(--ytml-player-thumbnail-size) !important;
 }
 
 html.ytml-fullscreen-mode ytmusic-player-bar button,
@@ -200,9 +205,9 @@ html.ytml-fullscreen-mode ytmusic-player-bar [role="button"] {
 }
 
 html.ytml-fullscreen-mode ytmusic-player-bar yt-icon {
-  height: 32px !important;
+  height: var(--ytml-player-control-icon-size) !important;
   margin: 0 !important;
-  width: 32px !important;
+  width: var(--ytml-player-control-icon-size) !important;
 }
 
 html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-inline-badge-renderer,
@@ -211,10 +216,10 @@ html.ytml-fullscreen-mode ytmusic-player-bar .explicit-badge {
   align-items: center !important;
   display: inline-flex !important;
   flex: 0 0 auto !important;
-  height: 18px !important;
+  height: var(--ytml-player-badge-size) !important;
   line-height: 1 !important;
   margin: 0 6px 0 0 !important;
-  max-height: 18px !important;
+  max-height: var(--ytml-player-badge-size) !important;
   position: static !important;
   transform: none !important;
   vertical-align: middle !important;
@@ -230,13 +235,13 @@ html.ytml-fullscreen-mode ytmusic-player-bar .explicit-badge img,
 html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-inline-badge-renderer svg,
 html.ytml-fullscreen-mode ytmusic-player-bar ytmusic-explicit-badge-renderer svg,
 html.ytml-fullscreen-mode ytmusic-player-bar .explicit-badge svg {
-  height: 18px !important;
+  height: var(--ytml-player-badge-size) !important;
   margin: 0 !important;
-  max-height: 18px !important;
-  max-width: 18px !important;
+  max-height: var(--ytml-player-badge-size) !important;
+  max-width: var(--ytml-player-badge-size) !important;
   position: static !important;
   transform: none !important;
-  width: 18px !important;
+  width: var(--ytml-player-badge-size) !important;
 }
 
 html.ytml-fullscreen-mode ytmusic-player-bar #play-pause-button,
@@ -246,11 +251,11 @@ html.ytml-fullscreen-mode ytmusic-player-bar [aria-label="Pause"],
 html.ytml-fullscreen-mode ytmusic-player-bar [aria-label^="Play "],
 html.ytml-fullscreen-mode ytmusic-player-bar [aria-label^="Pause "] {
   border-radius: 999px !important;
-  height: 76px !important;
-  min-height: 76px !important;
-  min-width: 76px !important;
+  height: var(--ytml-player-play-button-size) !important;
+  min-height: var(--ytml-player-play-button-size) !important;
+  min-width: var(--ytml-player-play-button-size) !important;
   padding: 0 !important;
-  width: 76px !important;
+  width: var(--ytml-player-play-button-size) !important;
 }
 
 html.ytml-fullscreen-mode ytmusic-player-bar #play-pause-button yt-icon,
@@ -259,13 +264,13 @@ html.ytml-fullscreen-mode ytmusic-player-bar [aria-label="Play"] yt-icon,
 html.ytml-fullscreen-mode ytmusic-player-bar [aria-label="Pause"] yt-icon,
 html.ytml-fullscreen-mode ytmusic-player-bar [aria-label^="Play "] yt-icon,
 html.ytml-fullscreen-mode ytmusic-player-bar [aria-label^="Pause "] yt-icon {
-  height: 44px !important;
+  height: var(--ytml-player-play-icon-size) !important;
   left: auto !important;
   margin: 0 !important;
   position: static !important;
   top: auto !important;
   transform: none !important;
-  width: 44px !important;
+  width: var(--ytml-player-play-icon-size) !important;
 }
 
 html.ytml-fullscreen-mode ytmusic-player-bar .title,

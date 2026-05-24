@@ -17,6 +17,12 @@
     trackReader,
     utils
   } = globalThis.YTML;
+  const OFFSET_ACTIONS = new Map([
+    ["decrease-large", { direction: -1, stepSeconds: offsetController.JUMP_SECONDS }],
+    ["decrease", { direction: -1 }],
+    ["increase", { direction: 1 }],
+    ["increase-large", { direction: 1, stepSeconds: offsetController.JUMP_SECONDS }]
+  ]);
 
   const state = {
     activeIndex: -1,
@@ -288,14 +294,19 @@
   function handleOffsetChange(action) {
     if (action === "reset") {
       state.offsetSeconds = offsetController.saveOffset(0);
-    } else if (action === "increase-large") {
-      state.offsetSeconds = offsetController.saveOffset(offsetController.adjustOffset(state.offsetSeconds, 1, offsetController.JUMP_SECONDS));
-    } else if (action === "decrease-large") {
-      state.offsetSeconds = offsetController.saveOffset(offsetController.adjustOffset(state.offsetSeconds, -1, offsetController.JUMP_SECONDS));
-    } else if (action === "increase") {
-      state.offsetSeconds = offsetController.saveOffset(offsetController.adjustOffset(state.offsetSeconds, 1));
-    } else if (action === "decrease") {
-      state.offsetSeconds = offsetController.saveOffset(offsetController.adjustOffset(state.offsetSeconds, -1));
+    } else {
+      const adjustment = OFFSET_ACTIONS.get(action);
+      if (!adjustment) {
+        return;
+      }
+
+      state.offsetSeconds = offsetController.saveOffset(
+        offsetController.adjustOffset(
+          state.offsetSeconds,
+          adjustment.direction,
+          adjustment.stepSeconds
+        )
+      );
     }
 
     overlay.setOffset(state.offsetSeconds);
