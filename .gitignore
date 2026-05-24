@@ -1,6 +1,0 @@
-# Keep README screenshots publishable; ignore extra local media captures.
-assets/*
-!assets/before.png
-!assets/preview.png
-!assets/fullscreen.png
-!assets/offset.png
